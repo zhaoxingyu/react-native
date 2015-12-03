@@ -18,6 +18,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.net.Uri;
 import android.text.Spannable;
 import android.text.style.ReplacementSpan;
@@ -100,7 +101,7 @@ public class TextInlineImageSpan extends ReplacementSpan {
       Paint paint) {
     if (mDrawable == null) {
 
-      mDrawable = new BitmapDrawable(Bitmap.createBitmap(0, 0, null));
+      mDrawable = new ShapeDrawable();
       mDrawable.setBounds(0, 0, mWidth, mHeight);
       mDrawable.setCallback(mTextView);
     }
