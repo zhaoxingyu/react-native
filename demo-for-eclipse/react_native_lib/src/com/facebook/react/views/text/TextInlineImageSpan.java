@@ -12,21 +12,16 @@ package com.facebook.react.views.text;
 import javax.annotation.Nullable;
 
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.Spannable;
 import android.text.style.ReplacementSpan;
 import android.widget.TextView;
-
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.generic.GenericDraweeHierarchy;
-import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
-import com.facebook.drawee.interfaces.DraweeController;
-import com.facebook.drawee.view.DraweeHolder;
-import com.facebook.imagepipeline.request.ImageRequest;
-import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 /**
  * TextInlineImageSpan is a span for Images that are inside <Text/>.  It computes it's size based
@@ -42,7 +37,6 @@ import com.facebook.imagepipeline.request.ImageRequestBuilder;
 public class TextInlineImageSpan extends ReplacementSpan {
 
   private @Nullable Drawable mDrawable;
-  private DraweeHolder<GenericDraweeHierarchy> mDraweeHolder;
 
   private int mHeight;
   private Uri mUri;
@@ -51,10 +45,6 @@ public class TextInlineImageSpan extends ReplacementSpan {
   private @Nullable TextView mTextView;
 
   public TextInlineImageSpan(Resources resources, int height, int width, @Nullable Uri uri) {
-    mDraweeHolder = new DraweeHolder(
-        GenericDraweeHierarchyBuilder.newInstance(resources)
-            .build()
-    );
 
     mHeight = height;
     mWidth = width;
@@ -66,19 +56,15 @@ public class TextInlineImageSpan extends ReplacementSpan {
    * that we can do proper lifetime management for Fresco
    */
   public void onDetachedFromWindow() {
-    mDraweeHolder.onDetach();
   }
 
   public void onStartTemporaryDetach() {
-    mDraweeHolder.onDetach();
   }
 
   public void onAttachedToWindow() {
-    mDraweeHolder.onAttach();
   }
 
   public void onFinishTemporaryDetach() {
-    mDraweeHolder.onAttach();
   }
 
   public @Nullable Drawable getDrawable() {
@@ -113,16 +99,8 @@ public class TextInlineImageSpan extends ReplacementSpan {
       int bottom,
       Paint paint) {
     if (mDrawable == null) {
-      ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(mUri)
-          .build();
 
-      DraweeController draweeController = Fresco.newDraweeControllerBuilder()
-          .setOldController(mDraweeHolder.getController())
-          .setImageRequest(imageRequest)
-          .build();
-      mDraweeHolder.setController(draweeController);
-
-      mDrawable = mDraweeHolder.getTopLevelDrawable();
+      mDrawable = new BitmapDrawable(Bitmap.createBitmap(0, 0, null));
       mDrawable.setBounds(0, 0, mWidth, mHeight);
       mDrawable.setCallback(mTextView);
     }

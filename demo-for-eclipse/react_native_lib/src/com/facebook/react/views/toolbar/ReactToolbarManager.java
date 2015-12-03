@@ -51,79 +51,79 @@ public class ReactToolbarManager extends ViewGroupManager<ReactToolbar> {
 
   @ReactProp(name = "logo")
   public void setLogo(ReactToolbar view, @Nullable ReadableMap logo) {
-    view.setLogoSource(logo);
+//    view.setLogoSource(logo);
   }
 
   @ReactProp(name = "navIcon")
   public void setNavIcon(ReactToolbar view, @Nullable ReadableMap navIcon) {
-    view.setNavIconSource(navIcon);
+//    view.setNavIconSource(navIcon);
   }
 
   @ReactProp(name = "overflowIcon")
   public void setOverflowIcon(ReactToolbar view, @Nullable ReadableMap overflowIcon) {
-    view.setOverflowIconSource(overflowIcon);
+//    view.setOverflowIconSource(overflowIcon);
   }
 
   @ReactProp(name = "subtitle")
   public void setSubtitle(ReactToolbar view, @Nullable String subtitle) {
-    view.setSubtitle(subtitle);
+//    view.setSubtitle(subtitle);
   }
 
   @ReactProp(name = "subtitleColor", customType = "Color")
   public void setSubtitleColor(ReactToolbar view, @Nullable Integer subtitleColor) {
-    int[] defaultColors = getDefaultColors(view.getContext());
-    if (subtitleColor != null) {
-      view.setSubtitleTextColor(subtitleColor);
-    } else {
-      view.setSubtitleTextColor(defaultColors[1]);
-    }
+//    int[] defaultColors = getDefaultColors(view.getContext());
+//    if (subtitleColor != null) {
+//      view.setSubtitleTextColor(subtitleColor);
+//    } else {
+//      view.setSubtitleTextColor(defaultColors[1]);
+//    }
   }
 
   @ReactProp(name = "title")
   public void setTitle(ReactToolbar view, @Nullable String title) {
-    view.setTitle(title);
+//    view.setTitle(title);
   }
 
   @ReactProp(name = "titleColor", customType = "Color")
   public void setTitleColor(ReactToolbar view, @Nullable Integer titleColor) {
-    int[] defaultColors = getDefaultColors(view.getContext());
-    if (titleColor != null) {
-      view.setTitleTextColor(titleColor);
-    } else {
-      view.setTitleTextColor(defaultColors[0]);
-    }
+//    int[] defaultColors = getDefaultColors(view.getContext());
+//    if (titleColor != null) {
+//      view.setTitleTextColor(titleColor);
+//    } else {
+//      view.setTitleTextColor(defaultColors[0]);
+//    }
   }
 
   @ReactProp(name = "nativeActions")
   public void setActions(ReactToolbar view, @Nullable ReadableArray actions) {
-    view.setActions(actions);
+//    view.setActions(actions);
   }
 
   @Override
   protected void addEventEmitters(final ThemedReactContext reactContext, final ReactToolbar view) {
     final EventDispatcher mEventDispatcher = reactContext.getNativeModule(UIManagerModule.class)
         .getEventDispatcher();
-    view.setNavigationOnClickListener(
-        new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            mEventDispatcher.dispatchEvent(
-                new ToolbarClickEvent(view.getId(), SystemClock.uptimeMillis(), -1));
-          }
-        });
-
-    view.setOnMenuItemClickListener(
-        new ReactToolbar.OnMenuItemClickListener() {
-          @Override
-          public boolean onMenuItemClick(MenuItem menuItem) {
-            mEventDispatcher.dispatchEvent(
-                new ToolbarClickEvent(
-                    view.getId(),
-                    SystemClock.uptimeMillis(),
-                    menuItem.getOrder()));
-            return true;
-          }
-        });
+//    view.setNavigationOnClickListener(
+//        new View.OnClickListener() {
+//          @Override
+//          public void onClick(View v) {
+//            mEventDispatcher.dispatchEvent(
+//                new ToolbarClickEvent(view.getId(), SystemClock.uptimeMillis(), -1));
+//          }
+//        });
+//
+//    view.setOnMenuItemClickListener(
+//        new ReactToolbar.OnMenuItemClickListener() {
+//          @Override
+//          public boolean onMenuItemClick(MenuItem menuItem) {
+//            mEventDispatcher.dispatchEvent(
+//                new ToolbarClickEvent(
+//                    view.getId(),
+//                    SystemClock.uptimeMillis(),
+//                    menuItem.getOrder()));
+//            return true;
+//          }
+//        });
   }
 
   @Nullable
@@ -142,41 +142,41 @@ public class ReactToolbarManager extends ViewGroupManager<ReactToolbar> {
     return true;
   }
 
-  private static int[] getDefaultColors(Context context) {
-    Resources.Theme theme = context.getTheme();
-    TypedArray toolbarStyle = null;
-    TypedArray textAppearances = null;
-    TypedArray titleTextAppearance = null;
-    TypedArray subtitleTextAppearance = null;
-
-    try {
-      toolbarStyle = theme
-          .obtainStyledAttributes(new int[]{R.attr.toolbarStyle});
-      int toolbarStyleResId = toolbarStyle.getResourceId(0, 0);
-      textAppearances = theme.obtainStyledAttributes(
-          toolbarStyleResId, new int[]{
-              R.attr.titleTextAppearance,
-              R.attr.subtitleTextAppearance,
-          });
-      int titleTextAppearanceResId = textAppearances.getResourceId(0, 0);
-      int subtitleTextAppearanceResId = textAppearances.getResourceId(1, 0);
-
-      titleTextAppearance = theme
-          .obtainStyledAttributes(titleTextAppearanceResId, new int[]{android.R.attr.textColor});
-      subtitleTextAppearance = theme
-          .obtainStyledAttributes(subtitleTextAppearanceResId, new int[]{android.R.attr.textColor});
-
-      int titleTextColor = titleTextAppearance.getColor(0, Color.BLACK);
-      int subtitleTextColor = subtitleTextAppearance.getColor(0, Color.BLACK);
-
-      return new int[] {titleTextColor, subtitleTextColor};
-    } finally {
-      recycleQuietly(toolbarStyle);
-      recycleQuietly(textAppearances);
-      recycleQuietly(titleTextAppearance);
-      recycleQuietly(subtitleTextAppearance);
-    }
-  }
+//  private static int[] getDefaultColors(Context context) {
+//    Resources.Theme theme = context.getTheme();
+//    TypedArray toolbarStyle = null;
+//    TypedArray textAppearances = null;
+//    TypedArray titleTextAppearance = null;
+//    TypedArray subtitleTextAppearance = null;
+//
+//    try {
+//      toolbarStyle = theme
+//          .obtainStyledAttributes(new int[]{R.attr.toolbarStyle});
+//      int toolbarStyleResId = toolbarStyle.getResourceId(0, 0);
+//      textAppearances = theme.obtainStyledAttributes(
+//          toolbarStyleResId, new int[]{
+//              R.attr.titleTextAppearance,
+//              R.attr.subtitleTextAppearance,
+//          });
+//      int titleTextAppearanceResId = textAppearances.getResourceId(0, 0);
+//      int subtitleTextAppearanceResId = textAppearances.getResourceId(1, 0);
+//
+//      titleTextAppearance = theme
+//          .obtainStyledAttributes(titleTextAppearanceResId, new int[]{android.R.attr.textColor});
+//      subtitleTextAppearance = theme
+//          .obtainStyledAttributes(subtitleTextAppearanceResId, new int[]{android.R.attr.textColor});
+//
+//      int titleTextColor = titleTextAppearance.getColor(0, Color.BLACK);
+//      int subtitleTextColor = subtitleTextAppearance.getColor(0, Color.BLACK);
+//
+//      return new int[] {titleTextColor, subtitleTextColor};
+//    } finally {
+//      recycleQuietly(toolbarStyle);
+//      recycleQuietly(textAppearances);
+//      recycleQuietly(titleTextAppearance);
+//      recycleQuietly(subtitleTextAppearance);
+//    }
+//  }
 
   private static void recycleQuietly(@Nullable TypedArray style) {
     if (style != null) {
