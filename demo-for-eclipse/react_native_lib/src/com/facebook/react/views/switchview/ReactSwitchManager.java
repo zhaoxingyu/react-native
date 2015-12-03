@@ -95,7 +95,7 @@ public class ReactSwitchManager extends SimpleViewManager<ReactSwitch> {
   @Override
   protected ReactSwitch createViewInstance(ThemedReactContext context) {
     ReactSwitch view = new ReactSwitch(context);
-    view.setShowText(false);
+//    view.setShowText(false);
     return view;
   }
 

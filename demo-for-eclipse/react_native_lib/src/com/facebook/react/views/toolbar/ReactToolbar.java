@@ -4,7 +4,6 @@ package com.facebook.react.views.toolbar;
 
 import android.content.Context;
 import android.widget.LinearLayout;
-import android.widget.Toolbar;
 
 /**
  * Custom implementation of the {@link Toolbar} widget that adds support for remote images in logo
