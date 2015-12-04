@@ -9,8 +9,8 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -26,9 +26,11 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 	private static final String KEY_MENTION = "mention";
 	private static final String KEY_CONTACT_LIST = "contact_list";
 	private static final String KEY_PIC_CMT_IN = "pic_cmt_in";
+//	private Context mContext;
 
 	public WeiboPrivacyModule(ReactApplicationContext reactContext) {
 		super(reactContext);
+//		mContext = reactContext.getApplicationContext();
 	}
 
 	@Override
@@ -45,40 +47,48 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 	
 	@ReactMethod
 	public void getStates(String url, Callback result){
-		JSONObject jsonData =  getJsonData();
-		JSONObject p = new JSONObject();
-		JSONObject m = new JSONObject();
-		try {
-			p = jsonData.getJSONObject("privacy");
-			m = jsonData.getJSONObject("mention");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		JSONObject jsonData =  getJsonData();	
 		
-		try {
-			int comment = p.getInt(KEY_COMMENT);
-			int mobile = p.getInt(KEY_MOBILE);
-			int bindstatus = p.getInt(KEY_BINDSTATUS);
-			int mention = m.getInt(KEY_MENTION);
-			int contact_list = m.getInt(KEY_CONTACT_LIST);
-			int pic_cmt_in = m.getInt(KEY_PIC_CMT_IN);
-//			result.invoke(comment,mobile,bindstatus,mention,contact_list,pic_cmt_in);
-			
-			/*WritableMap map=Arguments.createMap();
-			map.putInt(KEY_COMMENT, comment);
-			map.putInt(KEY_MOBILE, mobile);
-			map.putInt(KEY_BINDSTATUS, bindstatus);
-			map.putInt(KEY_MENTION, mention);
-			map.putInt(KEY_CONTACT_LIST, contact_list);
-			map.putInt(KEY_PIC_CMT_IN, pic_cmt_in);*/
-			Log.d(TAG,jsonData.toString());
-			result.invoke(jsonData.toString());
-			
-		} catch (JSONException e) {
-			e.getStackTrace();
-		}
+		//使用weibo中的网络请求流程，集成到微博工程之后可以使用
+		/*RequestParam param = new RequestParam(mContext,user);
+		JSONObject jsonData = getPrivacyStates(url,param);*/
+		
+		Log.d(TAG,jsonData.toString());
+		result.invoke(jsonData.toString());
 	}
+	
+	/**
+	 * 使用weibo中的http get网络请求流程，集成到微博工程之后可以使用
+	 * @return 
+	 */
+	/*public JSONObject getPrivacyStates(String url,RequestParam requestParam)
+            throws WeiboApiException, WeiboParseException, WeiboIOException {
+       Bundle getParams = requestParam.getNetRequestGetBundle();
+
+       HttpResult content = NetUtils.openUrl(url.toString(),
+                NetUtils.METHOD_GET, requestParam, mContext);
+        JSONObject result = new JSONObject(content.httpResponse);
+       try {
+            return new JSONObject(content.httpResponse);
+        } catch (JSONException e) {
+            WeiboParseException e1 = new WeiboParseException(e);
+            NetUtils.dealWeiboParseException(mContext, content, e1);
+            throw e1;
+        }
+    }*/
+	
+	/**
+	 * 使用weibo中的http post网络请求流程，集成到微博工程之后可以使用
+	 * @return 
+	 */
+	/*public String updatePrivacyStates(String url,RequestParam requestParam)
+            throws WeiboApiException, WeiboParseException, WeiboIOException {
+       Bundle postParams = requestParam.getNetRequestPostBundle();
+
+       HttpResult content = NetUtils.openUrl(url.toString(),
+                NetUtils.METHOD_POST, requestParam, mContext);
+        return content.httpResponse;
+    }*/
 	
 	private JSONObject getJsonData(){
 		JSONObject jsonData = new JSONObject();
@@ -104,6 +114,9 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 	@ReactMethod
 	public void updateState(String url,String key, Integer value){
 		Log.d("ReactNativeModule","update state " + key +" with value " + value);
+		/*RequestParam param = new RequestParam(mContext,user);
+		param.putInt("allow_"+key,value);
+		getPrivacyStates(url,param);*/
 	}
 
 }
