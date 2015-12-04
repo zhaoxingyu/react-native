@@ -15,6 +15,8 @@ var { NativeModules } = require('react-native');
 var RCTWeiboPrivacyAndroid= NativeModules.WeiboPrivacyAndroid;
 
 var WeiboPrivacyAndroid = {
+  Tag:RCTWeiboPrivacyAndroid.Tag,
+  
   getStates: function (
     url: string,
     callback: Function,

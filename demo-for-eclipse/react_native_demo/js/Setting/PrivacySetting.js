@@ -18,40 +18,32 @@ var WeiboPrivacyAndroid = require('./WeiboPrivacyAndroid');
 var PrivacySettingPage = React.createClass({
 	
 	 propTypes: { 
-		 comment: React.PropTypes.number, 
-		 mobile:React.PropTypes.number, 
-		 bindstatus: React.PropTypes.number, 
-		 mention:React.PropTypes.number, 
-		 contact_list: React.PropTypes.number, 
-		 pic_cmt_in:React.PropTypes.number, 
+		 result:React.PropTypes.object,
 	 },	 
 	
 	getDefaultProps: function() {
-	    console.log('getDefaultProps');
+	    /*console.log('getDefaultProps');*/
 	 },
 
   getInitialState : function() {
-	  console.log('getInitialState');
+	  /*console.log('getInitialState');*/
     return {
       trueSwitchIsOn: true,
       falseSwitchIsOn: false,
       colorTrueSwitchIsOn: true,
-      /*comment:this.props.comment,
-      mobile:this.props.mobile,
-      bindstatus:this.props.bindstatus,
-      mention:this.props.mention,
-      contact_list:this.props.contact_list,
-      pic_cmt_in:this.props.pic_cmt_in,*/
     };
   },
   
   componentWillMount:function(){
-	  console.log('componentWillMount');
+	  /*console.log('componentWillMount');*/
   },
 
   render: function() {
 	console.log('render');
-	console.log(this.props.comment,this.props.mobile,this.props.bindstatus,this.props.mention,this.props.contact_list,this.props.pic_cmt_in);
+	if(this.props.result){
+		console.log(WeiboPrivacyAndroid.Tag,'PrivacySettingPage',this.props.result.privacy.comment,this.props.result.privacy.mobile,this.props.result.privacy.bindstatus,
+				this.props.result.mention.mention,this.props.result.mention.contact_list,this.props.result.mention.pic_cmt_in);
+	}
     return (
       <PageView title="隐私设置">
         <PageBlock title="通讯录">

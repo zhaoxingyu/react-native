@@ -4,19 +4,22 @@
  */
 package com.sina.weibo.reactnative.modules;
 
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
+import android.widget.Toast;
 
-import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.common.MapBuilder;
 
 public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
+	private static final String TAG = "WeiboPrivacyModule";
 	private static final String KEY_COMMENT = "comment";
 	private static final String KEY_MOBILE = "mobile";
 	private static final String KEY_BINDSTATUS = "bindstatus";
@@ -32,6 +35,13 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 	public String getName() {
 		return "WeiboPrivacyAndroid";
 	}
+	
+	@Override
+	public Map<String, Object> getConstants() {
+	    final Map<String, Object> constants = MapBuilder.newHashMap();
+	    constants.put("Tag", TAG);
+	    return constants;
+	 }
 	
 	@ReactMethod
 	public void getStates(String url, Callback result){
@@ -53,7 +63,18 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 			int mention = m.getInt(KEY_MENTION);
 			int contact_list = m.getInt(KEY_CONTACT_LIST);
 			int pic_cmt_in = m.getInt(KEY_PIC_CMT_IN);
-			result.invoke(comment,mobile,bindstatus,mention,contact_list,pic_cmt_in);
+//			result.invoke(comment,mobile,bindstatus,mention,contact_list,pic_cmt_in);
+			
+			/*WritableMap map=Arguments.createMap();
+			map.putInt(KEY_COMMENT, comment);
+			map.putInt(KEY_MOBILE, mobile);
+			map.putInt(KEY_BINDSTATUS, bindstatus);
+			map.putInt(KEY_MENTION, mention);
+			map.putInt(KEY_CONTACT_LIST, contact_list);
+			map.putInt(KEY_PIC_CMT_IN, pic_cmt_in);*/
+			Log.d(TAG,jsonData.toString());
+			result.invoke(jsonData.toString());
+			
 		} catch (JSONException e) {
 			e.getStackTrace();
 		}
