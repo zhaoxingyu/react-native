@@ -13,7 +13,7 @@ var PageView = require('PageView');
 var View = require('View');
 var TouchableHighlight = require('TouchableHighlight');
 var SwitchItem = require('SwitchItem');
-var WeiboPrivacyAndroid = require('./WeiboPrivacyAndroid');
+var WeiboPrivacyAndroid = require('WeiboPrivacyAndroid');
 
 var PrivacySettingPage = React.createClass({
 	
