@@ -23,7 +23,7 @@ public class HelloWorld extends Activity implements DefaultHardwareBackBtnHandle
         mReactInstanceManager = ReactInstanceManager.builder()
                 .setApplication(getApplication())
 //                .setBundleAssetName("helloword.bundle")
-                .setJSMainModuleName("demo-for-eclipse/react_native_demo/js/HelloWorld/index.android")
+                .setJSMainModuleName("demo-for-eclipse/react_native_demo/js/reactjs/HelloWorld/index.android")
                 .addPackage(new MainReactPackage())
                 .setUseDeveloperSupport(BuildConfig.DEBUG)
                 .setInitialLifecycleState(LifecycleState.RESUMED)

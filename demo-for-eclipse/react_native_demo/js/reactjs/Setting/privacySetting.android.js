@@ -9,7 +9,7 @@ var {
 } = React;
 
 var PrivacySettingPage = require('./PrivacySetting');
-var WeiboPrivacyAndroid = require('./WeiboPrivacyAndroid');
+var WeiboPrivacyAndroid = require('WeiboPrivacyAndroid');
 
 var PrivacySetting = React.createClass({
 	getInitialState : function() {

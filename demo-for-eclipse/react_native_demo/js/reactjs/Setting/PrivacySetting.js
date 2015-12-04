@@ -5,7 +5,7 @@
 
 var React = require('React');
 	
-var SwitchAndroid = require('SwitchAndroid');
+var SwitchWeibo = require('SwitchWeibo');
 var Text = require('Text');
 var StyleSheet = require('StyleSheet');
 var PageBlock = require('PageBlock');
@@ -13,7 +13,7 @@ var PageView = require('PageView');
 var View = require('View');
 var TouchableHighlight = require('TouchableHighlight');
 var SwitchItem = require('SwitchItem');
-var WeiboPrivacyAndroid = require('./WeiboPrivacyAndroid');
+var WeiboPrivacyAndroid = require('WeiboPrivacyAndroid');
 
 var PrivacySettingPage = React.createClass({
 	
@@ -48,13 +48,13 @@ var PrivacySettingPage = React.createClass({
       <PageView title="隐私设置">
         <PageBlock title="通讯录">
         	<SwitchItem title="允许给我推荐通讯录好友">
-	          <SwitchAndroid
+	          <SwitchWeibo
 	            onValueChange={(value) => this.setState({trueSwitchIsOn: value})}
 	            value={this.state.trueSwitchIsOn} />
 	        </SwitchItem>
 	        
 	        <SwitchItem title="允许通过此手机号搜到我">
-	          <SwitchAndroid
+	          <SwitchWeibo
 	            onValueChange={(value) => this.setState({falseSwitchIsOn: value})}
 	            value={this.state.falseSwitchIsOn} />
 	        </SwitchItem>
@@ -78,7 +78,7 @@ var PrivacySettingPage = React.createClass({
         </PageBlock>
         <PageBlock title="">
 	        <SwitchItem title="允许评论带图">
-		        <SwitchAndroid
+		        <SwitchWeibo
 		          onValueChange={(value) => this.setState({colorTrueSwitchIsOn: value})}
 		          value={this.state.colorTrueSwitchIsOn} />
 	        </SwitchItem>
