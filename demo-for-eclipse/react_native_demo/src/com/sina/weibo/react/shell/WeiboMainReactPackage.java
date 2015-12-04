@@ -18,7 +18,22 @@ import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
+import com.facebook.react.views.drawer.ReactDrawerLayoutManager;
+import com.facebook.react.views.image.ReactImageManager;
+import com.facebook.react.views.progressbar.ReactProgressBarViewManager;
+import com.facebook.react.views.scroll.ReactHorizontalScrollViewManager;
+import com.facebook.react.views.scroll.ReactScrollViewManager;
+import com.facebook.react.views.switchview.ReactSwitchManager;
+import com.facebook.react.views.text.ReactRawTextManager;
+import com.facebook.react.views.text.ReactTextInlineImageViewManager;
+import com.facebook.react.views.text.ReactTextViewManager;
+import com.facebook.react.views.text.ReactVirtualTextViewManager;
+import com.facebook.react.views.textinput.ReactTextInputManager;
+import com.facebook.react.views.toolbar.ReactToolbarManager;
+import com.facebook.react.views.view.ReactViewManager;
+import com.facebook.react.views.viewpager.ReactViewPagerManager;
 import com.sina.weibo.reactnative.modules.WeiboPrivacyModule;
+import com.sina.weibo.reactnative.views.switchview.WeiboSwitchManager;
 
 /**
  * Package defining basic modules and view managers.
@@ -38,6 +53,6 @@ public class WeiboMainReactPackage implements ReactPackage {
 
 	@Override
 	public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-		return Collections.emptyList();
+		return Arrays.<ViewManager>asList(new WeiboSwitchManager());
   }
 }
