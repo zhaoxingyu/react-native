@@ -116,7 +116,7 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 		Log.d("ReactNativeModule","update state " + key +" with value " + value);
 		/*RequestParam param = new RequestParam(mContext,user);
 		param.putInt("allow_"+key,value);
-		getPrivacyStates(url,param);*/
+		updatePrivacyStates(url,param);*/
 	}
 
 }
