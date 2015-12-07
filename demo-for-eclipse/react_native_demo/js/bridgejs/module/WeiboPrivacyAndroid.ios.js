@@ -14,7 +14,7 @@ var warning = require('warning');
 
 var WeiboPrivacyAndroid = {
 
-  show: function (
+ getStates: function (
     message: string,
     duration: number
   ): void {

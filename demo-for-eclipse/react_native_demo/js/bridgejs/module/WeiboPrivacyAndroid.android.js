@@ -26,10 +26,9 @@ var WeiboPrivacyAndroid = {
   
   updateState: function(
 	url: string,
-	key: string,
-	value: number,
+	jsondata: string,
 	):void{
-	RCTWeiboPrivacyAndroid.updateState(url,key,value); 
+	RCTWeiboPrivacyAndroid.updateState(url,jsondata); 
   },
 
 };

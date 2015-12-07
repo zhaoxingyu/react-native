@@ -4,18 +4,21 @@
  */
 package com.sina.weibo.reactnative.modules;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
 
 public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
@@ -112,8 +115,23 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 	}
 	
 	@ReactMethod
-	public void updateState(String url,String key, Integer value){
-		Log.d("ReactNativeModule","update state " + key +" with value " + value);
+	public void updateState(String url, String jsonString){
+		JSONObject json;
+		try {
+			if(!TextUtils.isEmpty(jsonString)){
+				json = new JSONObject(jsonString);
+				Iterator<?> it = json.keys();  
+		        while (it.hasNext()) {  
+		            String key = (String) it.next();  
+		            Integer value = json.getInt(key);  
+		            Log.d("ReactNativeModule","update state " + key +" with value " + value);
+		        }  
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}  
+		
 		/*RequestParam param = new RequestParam(mContext,user);
 		param.putInt("allow_"+key,value);
 		updatePrivacyStates(url,param);*/
