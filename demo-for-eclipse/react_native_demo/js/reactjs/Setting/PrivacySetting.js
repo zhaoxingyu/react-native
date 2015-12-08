@@ -7,6 +7,7 @@ var React = require('React');
 	
 var SwitchWeibo = require('SwitchWeibo');
 var Text = require('Text');
+var Image = require('Image');
 var StyleSheet = require('StyleSheet');
 var PageBlock = require('PageBlock');
 var PageView = require('PageView');
@@ -14,6 +15,9 @@ var View = require('View');
 var TouchableHighlight = require('TouchableHighlight');
 var SwitchItem = require('SwitchItem');
 var WeiboPrivacyAndroid = require('WeiboPrivacyAndroid');
+
+var checked = require('image!common_checkbox_checked');
+var unchecked = require('image!common_checkbox_unchecked');
 
 var PrivacySettingPage = React.createClass({	
   propTypes: { 
@@ -25,31 +29,70 @@ var PrivacySettingPage = React.createClass({
       mobileSwitchIsOn: true,
       contactListSwitchIsOn: false,
       picCmtSwitchIsOn: true,
-      contactId:'contact_list',
-      mobileId:'mobile',
-      piccmtinId:'pic_cmt_in',
+      all:0,
+      myfollow:1,
+      myfans:3,
+      currentCommentId:0,
+      currentMentionId:0,
     };
+  },
+  
+  componentWillReceiveProps:function(nextProps){
+	  if(nextProps.result){
+		  console.log('componentWillReceiveProps: ' + JSON.stringify(nextProps.result));
+		  this.setState({
+			  mobileSwitchIsOn:nextProps.result.privacy.mobile===1,
+			  contactListSwitchIsOn:nextProps.result.mention.contact_list===1,
+			  picCmtSwitchIsOn:nextProps.result.mention.pic_cmt_in===1,
+			  currentCommentId:nextProps.result.privacy.comment,
+			  currentMentionId:nextProps.result.mention.mention,
+		  });
+	  }
+  },
+  
+  shouldComponentUpdate:function(nextProps,nextState){
+	  var updateUI = false;
+	  //判断comment id 是否有更新
+	  if(this.state.currentCommentId !== nextState.currentCommentId){
+		  console.log('shouldComponentUpdate comment id: ' + nextState.currentCommentId + " prev id: " + this.state.currentCommentId);
+		  var json = '{comment:'+nextState.currentCommentId+'}';
+		  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
+		  updateUI=true;
+	  }
+	  //判断mention id 是否有更新
+	  if(this.state.currentMentionId !== nextState.currentMentionId){
+		  console.log('shouldComponentUpdate mention id: ' + nextState.currentMentionId + " prev id: " + this.state.currentMentionId);
+		  var json = '{mention:'+nextState.currentMentionId+'}';
+		  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
+		  updateUI=true;
+	  }
+
+	  return updateUI;
   },
 
   render: function() {
 	console.log('render');
+	console.log('current mention id:' + this.state.currentMentionId);
+	console.log('current comment id:' + this.state.currentCommentId);
 	var bindstatus;
 	if(this.props.result){
-		console.log(WeiboPrivacyAndroid.Tag,'PrivacySettingPage',this.props.result.privacy.comment,this.props.result.privacy.mobile,this.props.result.privacy.bindstatus,
-				this.props.result.mention.mention,this.props.result.mention.contact_list,this.props.result.mention.pic_cmt_in);
+		console.log(WeiboPrivacyAndroid.Tag,'PrivacySettingPage',this.props.result.privacy.mobile,this.props.result.mention.contact_list,
+				this.props.result.privacy.comment,this.props.result.mention.pic_cmt_in,this.props.result.mention.mention,this.props.result.privacy.bindstatus);
+		console.log(WeiboPrivacyAndroid.Tag,'PrivacySettingPage',this.state.mobileSwitchIsOn,this.state.contactListSwitchIsOn,
+				this.state.currentCommentId,this.state.picCmtSwitchIsOn,this.state.currentMentionId);
 		if(this.props.result.privacy.bindstatus){
 			if(this.props.result.privacy.bindstatus == 1){
 				bindstatus=
 					<PageBlock title="通讯录">
 			        	<SwitchItem title="允许给我推荐通讯录好友" mobileSwitchIsOn={this.state.mobileSwitchIsOn}>
 				          <SwitchWeibo
-				            onValueChange={(value) => {this.setState({contactListSwitchIsOn: value}); this.handleSwitchChange(this.state.contactId,this.state.contactListSwitchIsOn);}}
+				            onValueChange={(value) => {this.setState({contactListSwitchIsOn: value}); this.handleSwitchChange('contact_list',this.state.contactListSwitchIsOn);}}
 				            value={this.state.contactListSwitchIsOn} />
 				        </SwitchItem>
 				        
 				        <SwitchItem title="允许通过此手机号搜到我">
 				          <SwitchWeibo
-				            onValueChange={(value) => {this.setState({mobileSwitchIsOn: value}); this.handleSwitchChange(this.state.mobileId,this.state.mobileSwitchIsOn);}}
+				            onValueChange={(value) => {this.setState({mobileSwitchIsOn: value}); this.handleSwitchChange('mobile',this.state.mobileSwitchIsOn);}}
 				            value={this.state.mobileSwitchIsOn} />
 				        </SwitchItem>
 			        </PageBlock>;
@@ -61,20 +104,50 @@ var PrivacySettingPage = React.createClass({
       <PageView title="隐私设置">
         {bindstatus}
         <PageBlock title="哪些人可以评论我的微博" description='关闭后，你的通讯录好友将不能通过通讯录找到你'>
-	        <SwitchItem type='comment' id="0" title="所有人"/>
-    		<SwitchItem type='comment' id="1" title="我关注的人"/>
-    		<SwitchItem type='comment' id="3" title="我的粉丝"/>
+        	<TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.all});}}>
+        		<View>
+        			<SwitchItem title="所有人">
+        				<Text>{this.state.currentCommentId===this.state.all?'checked':''}</Text>
+        			</SwitchItem>
+        		</View>
+	        </TouchableHighlight>
+	        <TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.myfollow});}}>
+    			<View>
+    				<SwitchItem title="我关注的人">
+        				<Text>{this.state.currentCommentId===this.state.myfollow?'checked':''}</Text>
+        			</SwitchItem>
+    			</View>
+	        </TouchableHighlight>
+    		<TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.myfans});}}>
+    			<View>
+    				<SwitchItem title="我的粉丝">
+        				<Text>{this.state.currentCommentId===this.state.myfans?'checked':''}</Text>
+        			</SwitchItem>
+    			</View>
+	        </TouchableHighlight>
         </PageBlock>
         <PageBlock title="">
 	        <SwitchItem title="允许评论带图">
 		        <SwitchWeibo
-		          onValueChange={(value) => {this.setState({picCmtSwitchIsOn: value});this.handleSwitchChange(this.state.piccmtinId,this.state.picCmtSwitchIsOn);}}
+		          onValueChange={(value) => {this.setState({picCmtSwitchIsOn: value});this.handleSwitchChange('pic_cmt_in',this.state.picCmtSwitchIsOn);}}
 		          value={this.state.picCmtSwitchIsOn} />
 	        </SwitchItem>
         </PageBlock>
         <PageBlock title="我可以收到哪些人的@提醒" description='关闭后，其他人将不能在你的微博下发布带图片的评论'>
-			<SwitchItem type='mention' id="0" title="所有人"/>
-		    <SwitchItem type='mention' id="1" title="我关注的人"/>
+        	<TouchableHighlight onPress={()=>{this.setState({currentMentionId:this.state.all});}}>
+        		<View>
+        			<SwitchItem title="所有人">
+        				<Text>{this.state.currentMentionId===this.state.all?'checked':''}</Text>
+        			</SwitchItem>
+        		</View>
+	        </TouchableHighlight>
+			<TouchableHighlight onPress={()=>{this.setState({currentMentionId:this.state.myfollow});}}>
+				<View>
+					<SwitchItem title="我关注的人">
+						<Text>{this.state.currentMentionId===this.state.myfollow?'checked':''}</Text>
+					</SwitchItem>
+				</View>
+	        </TouchableHighlight>
         </PageBlock>
         
       </PageView>
@@ -92,6 +165,7 @@ var PrivacySettingPage = React.createClass({
 	  console.log(json);
 	  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json); 
   },
+  
 });
 
 module.exports = PrivacySettingPage;

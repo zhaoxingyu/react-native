@@ -28,10 +28,6 @@ var PrivacySetting = React.createClass({
 		});		
 	},
   render: function() {
-	/*if(this.state.result){
-		console.log(WeiboPrivacyAndroid.Tag,this.state.result.privacy.comment,this.state.result.privacy.mobile,this.state.result.privacy.bindstatus,
-				this.state.result.mention.mention,this.state.result.mention.contact_list,this.state.result.mention.pic_cmt_in);
-	}*/
     return (
     	<PrivacySettingPage result={this.state.result}/>
    );
