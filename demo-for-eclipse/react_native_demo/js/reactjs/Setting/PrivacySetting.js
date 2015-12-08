@@ -29,11 +29,11 @@ var PrivacySettingPage = React.createClass({
       mobileSwitchIsOn: true,
       contactListSwitchIsOn: false,
       picCmtSwitchIsOn: true,
+      all:0,
+      myfollow:1,
+      myfans:3,
       currentCommentId:0,
       currentMentionId:0,
-      lastCommentId:0,
-      lastMentionId:0,
-      data:null,
     };
   },
   
@@ -46,10 +46,24 @@ var PrivacySettingPage = React.createClass({
 			  picCmtSwitchIsOn:nextProps.result.mention.pic_cmt_in===1,
 			  currentCommentId:nextProps.result.privacy.comment,
 			  currentMentionId:nextProps.result.mention.mention,
-			  lastCommentId:nextProps.result.privacy.comment,
-			  lastMentionId:nextProps.result.mention.mention,
 		  });
 	  }
+  },
+  
+  shouldComponentUpdate:function(nextProps,nextState){
+	  console.log('shouldComponentUpdate: ' + nextState.currentCommentId + " prev id: " + this.state.currentCommentId);
+	  if(this.state.currentCommentId !== nextState.currentCommentId){
+		  var json = '{comment:'+nextState.currentCommentId+'}';
+		  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
+	  }
+
+	  console.log('shouldComponentUpdate: ' + nextState.currentMentionId + " prev id: " + this.state.currentMentionId);
+	  if(this.state.currentMentionId !== nextState.currentMentionId){
+		  var json = '{mention:'+nextState.currentMentionId+'}';
+		  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
+	  }
+
+	  return true;
   },
 
   render: function() {
@@ -86,24 +100,24 @@ var PrivacySettingPage = React.createClass({
       <PageView title="隐私设置">
         {bindstatus}
         <PageBlock title="哪些人可以评论我的微博" description='关闭后，你的通讯录好友将不能通过通讯录找到你'>
-        	<TouchableHighlight onPress={()=>{this.setState({currentCommentId: 0});}}>
+        	<TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.all});}}>
         		<View>
         			<SwitchItem title="所有人">
-        				<Text>{this.state.currentCommentId===0?'checked':''}</Text>
+        				<Text>{this.state.currentCommentId===this.state.all?'checked':''}</Text>
         			</SwitchItem>
         		</View>
 	        </TouchableHighlight>
-	        <TouchableHighlight onPress={()=>{this.setState({currentCommentId: 1});}}>
+	        <TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.myfollow});}}>
     			<View>
     				<SwitchItem title="我关注的人">
-        				<Text>{this.state.currentCommentId===1?'checked':''}</Text>
+        				<Text>{this.state.currentCommentId===this.state.myfollow?'checked':''}</Text>
         			</SwitchItem>
     			</View>
 	        </TouchableHighlight>
-    		<TouchableHighlight onPress={()=>{this.setState({currentCommentId: 3});}}>
+    		<TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.myfans});}}>
     			<View>
     				<SwitchItem title="我的粉丝">
-        				<Text>{this.state.currentCommentId===3?'checked':''}</Text>
+        				<Text>{this.state.currentCommentId===this.state.myfans?'checked':''}</Text>
         			</SwitchItem>
     			</View>
 	        </TouchableHighlight>
@@ -116,17 +130,17 @@ var PrivacySettingPage = React.createClass({
 	        </SwitchItem>
         </PageBlock>
         <PageBlock title="我可以收到哪些人的@提醒" description='关闭后，其他人将不能在你的微博下发布带图片的评论'>
-        	<TouchableHighlight onPress={()=>{this.setState({currentMentionId: 0});}}>
+        	<TouchableHighlight onPress={()=>{this.setState({currentMentionId:this.state.all});}}>
         		<View>
         			<SwitchItem title="所有人">
-        				<Text>{this.state.currentMentionId===0?'checked':''}</Text>
+        				<Text>{this.state.currentMentionId===this.state.all?'checked':''}</Text>
         			</SwitchItem>
         		</View>
 	        </TouchableHighlight>
-			<TouchableHighlight onPress={()=>{this.setState({currentMentionId: 1});}}>
+			<TouchableHighlight onPress={()=>{this.setState({currentMentionId:this.state.myfollow});}}>
 				<View>
 					<SwitchItem title="我关注的人">
-						<Text>{this.state.currentMentionId===1?'checked':''}</Text>
+						<Text>{this.state.currentMentionId===this.state.myfollow?'checked':''}</Text>
 					</SwitchItem>
 				</View>
 	        </TouchableHighlight>
@@ -146,26 +160,6 @@ var PrivacySettingPage = React.createClass({
 	  var json = '{'+key+':'+value+'}';
 	  console.log(json);
 	  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json); 
-  },
-
-  componentDidUpdate:function(){
-	console.log('componentDidUpdate');
-	console.log('last mention id:' + this.state.lastMentionId);
-	console.log('last comment id:' + this.state.lastCommentId);
-	if(this.state.currentMentionId !== this.state.lastMentionId){
-		var json = '{mention:'+this.state.currentMentionId+'}';
-		WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
-		this.setState({
-			lastMentionId:this.state.currentMentionId,
-		});
-	}
-	if(this.state.currentCommentId !== this.state.lastCommentId){
-		var json = '{comment:'+this.state.currentCommentId+'}';
-		WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
-		this.setState({
-			lastCommentId:this.state.currentCommentId,
-		});
-	}
   },
   
 });
