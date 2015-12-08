@@ -116,14 +116,19 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 	
 	@ReactMethod
 	public void updateState(String url, String jsonString){
-		JSONObject json;
+		JSONObject json = new JSONObject();
+		//RequestParam param = new RequestParam(mContext,user);
 		try {
 			if(!TextUtils.isEmpty(jsonString)){
 				json = new JSONObject(jsonString);
 				Iterator<?> it = json.keys();  
 		        while (it.hasNext()) {  
 		            String key = (String) it.next();  
-		            Integer value = json.getInt(key);  
+		            Integer value = json.getInt(key); 
+		            if(key.equals("mobile")||key.equals("comment")){
+		            	key = "allow_" + key;
+		            }
+		            //param.putInt(key,value);
 		            Log.d("ReactNativeModule","update state " + key +" with value " + value);
 		        }  
 			}
@@ -132,9 +137,7 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 			e.printStackTrace();
 		}  
 		
-		/*RequestParam param = new RequestParam(mContext,user);
-		param.putInt("allow_"+key,value);
-		updatePrivacyStates(url,param);*/
+		/*updatePrivacyStates(url,param);*/
 	}
 
 }
