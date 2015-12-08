@@ -39,7 +39,7 @@ var PrivacySettingPage = React.createClass({
   
   componentWillReceiveProps:function(nextProps){
 	  if(nextProps.result){
-		  console.log('componentWillReceiveProps: ' + nextProps.result);
+		  console.log('componentWillReceiveProps: ' + JSON.stringify(nextProps.result));
 		  this.setState({
 			  mobileSwitchIsOn:nextProps.result.privacy.mobile===1,
 			  contactListSwitchIsOn:nextProps.result.mention.contact_list===1,
@@ -51,19 +51,23 @@ var PrivacySettingPage = React.createClass({
   },
   
   shouldComponentUpdate:function(nextProps,nextState){
-	  console.log('shouldComponentUpdate comment id: ' + nextState.currentCommentId + " prev id: " + this.state.currentCommentId);
+	  var updateUI = false;
+	  //判断comment id 是否有更新
 	  if(this.state.currentCommentId !== nextState.currentCommentId){
+		  console.log('shouldComponentUpdate comment id: ' + nextState.currentCommentId + " prev id: " + this.state.currentCommentId);
 		  var json = '{comment:'+nextState.currentCommentId+'}';
 		  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
+		  updateUI=true;
 	  }
-
-	  console.log('shouldComponentUpdate mention id: ' + nextState.currentMentionId + " prev id: " + this.state.currentMentionId);
+	  //判断mention id 是否有更新
 	  if(this.state.currentMentionId !== nextState.currentMentionId){
+		  console.log('shouldComponentUpdate mention id: ' + nextState.currentMentionId + " prev id: " + this.state.currentMentionId);
 		  var json = '{mention:'+nextState.currentMentionId+'}';
 		  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
+		  updateUI=true;
 	  }
 
-	  return true;
+	  return updateUI;
   },
 
   render: function() {
