@@ -1,4 +1,5 @@
-__DEV__ = true;
+__DEV__ = 
+true;
 
 
 __BUNDLE_START_TIME__ = Date.now();
@@ -1215,10 +1216,6 @@ result:JSON.parse(result)});});},
 
 
 render:function(){
-
-
-
-
 return (
 React.createElement(PrivacySettingPage,{result:this.state.result}));}});
 
@@ -56349,6 +56346,7 @@ var React=require('React');
 
 var SwitchWeibo=require('SwitchWeibo');
 var Text=require('Text');
+var Image=require('Image');
 var StyleSheet=require('StyleSheet');
 var PageBlock=require('PageBlock');
 var PageView=require('PageView');
@@ -56356,6 +56354,9 @@ var View=require('View');
 var TouchableHighlight=require('TouchableHighlight');
 var SwitchItem=require('SwitchItem');
 var WeiboPrivacyAndroid=require('WeiboPrivacyAndroid');
+
+var checked=require('image!common_checkbox_checked');
+var unchecked=require('image!common_checkbox_unchecked');
 
 var PrivacySettingPage=React.createClass({displayName:'PrivacySettingPage',
 propTypes:{
@@ -56367,31 +56368,70 @@ return {
 mobileSwitchIsOn:true,
 contactListSwitchIsOn:false,
 picCmtSwitchIsOn:true,
-contactId:'contact_list',
-mobileId:'mobile',
-piccmtinId:'pic_cmt_in'};},
+all:0,
+myfollow:1,
+myfans:3,
+currentCommentId:0,
+currentMentionId:0};},
 
+
+
+componentWillReceiveProps:function(nextProps){
+if(nextProps.result){
+console.log('componentWillReceiveProps: ' + JSON.stringify(nextProps.result));
+this.setState({
+mobileSwitchIsOn:nextProps.result.privacy.mobile === 1,
+contactListSwitchIsOn:nextProps.result.mention.contact_list === 1,
+picCmtSwitchIsOn:nextProps.result.mention.pic_cmt_in === 1,
+currentCommentId:nextProps.result.privacy.comment,
+currentMentionId:nextProps.result.mention.mention});}},
+
+
+
+
+shouldComponentUpdate:function(nextProps,nextState){
+var updateUI=false;
+
+if(this.state.currentCommentId !== nextState.currentCommentId){
+console.log('shouldComponentUpdate comment id: ' + nextState.currentCommentId + " prev id: " + this.state.currentCommentId);
+var json='{comment:' + nextState.currentCommentId + '}';
+WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
+updateUI = true;}
+
+
+if(this.state.currentMentionId !== nextState.currentMentionId){
+console.log('shouldComponentUpdate mention id: ' + nextState.currentMentionId + " prev id: " + this.state.currentMentionId);
+var json='{mention:' + nextState.currentMentionId + '}';
+WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
+updateUI = true;}
+
+
+return updateUI;},
 
 
 render:function(){var _this=this;
 console.log('render');
+console.log('current mention id:' + this.state.currentMentionId);
+console.log('current comment id:' + this.state.currentCommentId);
 var bindstatus;
 if(this.props.result){
-console.log(WeiboPrivacyAndroid.Tag,'PrivacySettingPage',this.props.result.privacy.comment,this.props.result.privacy.mobile,this.props.result.privacy.bindstatus,
-this.props.result.mention.mention,this.props.result.mention.contact_list,this.props.result.mention.pic_cmt_in);
+console.log(WeiboPrivacyAndroid.Tag,'PrivacySettingPage',this.props.result.privacy.mobile,this.props.result.mention.contact_list,
+this.props.result.privacy.comment,this.props.result.mention.pic_cmt_in,this.props.result.mention.mention,this.props.result.privacy.bindstatus);
+console.log(WeiboPrivacyAndroid.Tag,'PrivacySettingPage',this.state.mobileSwitchIsOn,this.state.contactListSwitchIsOn,
+this.state.currentCommentId,this.state.picCmtSwitchIsOn,this.state.currentMentionId);
 if(this.props.result.privacy.bindstatus){
 if(this.props.result.privacy.bindstatus == 1){
 bindstatus = 
 React.createElement(PageBlock,{title:'通讯录'},
 React.createElement(SwitchItem,{title:'允许给我推荐通讯录好友',mobileSwitchIsOn:this.state.mobileSwitchIsOn},
 React.createElement(SwitchWeibo,{
-onValueChange:function(value){_this.setState({contactListSwitchIsOn:value});_this.handleSwitchChange(_this.state.contactId,_this.state.contactListSwitchIsOn);},
+onValueChange:function(value){_this.setState({contactListSwitchIsOn:value});_this.handleSwitchChange('contact_list',_this.state.contactListSwitchIsOn);},
 value:this.state.contactListSwitchIsOn})),
 
 
 React.createElement(SwitchItem,{title:'允许通过此手机号搜到我'},
 React.createElement(SwitchWeibo,{
-onValueChange:function(value){_this.setState({mobileSwitchIsOn:value});_this.handleSwitchChange(_this.state.mobileId,_this.state.mobileSwitchIsOn);},
+onValueChange:function(value){_this.setState({mobileSwitchIsOn:value});_this.handleSwitchChange('mobile',_this.state.mobileSwitchIsOn);},
 value:this.state.mobileSwitchIsOn})));}}}
 
 
@@ -56403,20 +56443,50 @@ return (
 React.createElement(PageView,{title:'隐私设置'},
 bindstatus,
 React.createElement(PageBlock,{title:'哪些人可以评论我的微博',description:'关闭后，你的通讯录好友将不能通过通讯录找到你'},
-React.createElement(SwitchItem,{type:'comment',id:'0',title:'所有人'}),
-React.createElement(SwitchItem,{type:'comment',id:'1',title:'我关注的人'}),
-React.createElement(SwitchItem,{type:'comment',id:'3',title:'我的粉丝'})),
+React.createElement(TouchableHighlight,{onPress:function(){_this.setState({currentCommentId:_this.state.all});}},
+React.createElement(View,null,
+React.createElement(SwitchItem,{title:'所有人'},
+React.createElement(Text,null,this.state.currentCommentId === this.state.all?'√':'')))),
+
+
+
+React.createElement(TouchableHighlight,{onPress:function(){_this.setState({currentCommentId:_this.state.myfollow});}},
+React.createElement(View,null,
+React.createElement(SwitchItem,{title:'我关注的人'},
+React.createElement(Text,null,this.state.currentCommentId === this.state.myfollow?'√':'')))),
+
+
+
+React.createElement(TouchableHighlight,{onPress:function(){_this.setState({currentCommentId:_this.state.myfans});}},
+React.createElement(View,null,
+React.createElement(SwitchItem,{title:'我的粉丝'},
+React.createElement(Text,null,this.state.currentCommentId === this.state.myfans?'√':''))))),
+
+
+
 
 React.createElement(PageBlock,{title:''},
 React.createElement(SwitchItem,{title:'允许评论带图'},
 React.createElement(SwitchWeibo,{
-onValueChange:function(value){_this.setState({picCmtSwitchIsOn:value});_this.handleSwitchChange(_this.state.piccmtinId,_this.state.picCmtSwitchIsOn);},
+onValueChange:function(value){_this.setState({picCmtSwitchIsOn:value});_this.handleSwitchChange('pic_cmt_in',_this.state.picCmtSwitchIsOn);},
 value:this.state.picCmtSwitchIsOn}))),
 
 
 React.createElement(PageBlock,{title:'我可以收到哪些人的@提醒',description:'关闭后，其他人将不能在你的微博下发布带图片的评论'},
-React.createElement(SwitchItem,{type:'mention',id:'0',title:'所有人'}),
-React.createElement(SwitchItem,{type:'mention',id:'1',title:'我关注的人'}))));},
+React.createElement(TouchableHighlight,{onPress:function(){_this.setState({currentMentionId:_this.state.all});}},
+React.createElement(View,null,
+React.createElement(SwitchItem,{title:'所有人'},
+React.createElement(Text,null,this.state.currentMentionId === this.state.all?'√':'')))),
+
+
+
+React.createElement(TouchableHighlight,{onPress:function(){_this.setState({currentMentionId:_this.state.myfollow});}},
+React.createElement(View,null,
+React.createElement(SwitchItem,{title:'我关注的人'},
+React.createElement(Text,null,this.state.currentMentionId === this.state.myfollow?'√':'')))))));},
+
+
+
 
 
 
@@ -56433,6 +56503,7 @@ value = 0;}
 var json='{' + key + ':' + value + '}';
 console.log(json);
 WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);}});
+
 
 
 
@@ -56784,27 +56855,12 @@ var WeiboPrivacyAndroid=require('WeiboPrivacyAndroid');
 
 var SwitchItem=React.createClass({displayName:'SwitchItem',
 propTypes:{
-type:React.PropTypes.string,
-id:React.PropTypes.string,
-selected:React.PropTypes.bool,
-
 title:React.PropTypes.string,
 description:React.PropTypes.string},
 
 
-getInitialStates:function(){
-return {
-comment_all:0,
-comment_myfavorite:1,
-comment_myfollow:2,
-metion_all:0,
-mention_myfavorite:1};},
-
-
-
 render:function(){
 return (
-React.createElement(TouchableHighlight,{onPress:this.handleUpdateState},
 React.createElement(View,{style:styles.container},
 React.createElement(View,null,
 React.createElement(Text,{style:styles.titleText},
@@ -56812,23 +56868,10 @@ this.props.title)),
 
 
 React.createElement(View,{style:styles.children},
-this.props.children))));},
+this.props.children)));}});
 
 
 
-
-
-
-handleUpdateState:function(){
-console.log('handle update');
-if(this.props.type == 'comment'){}
-
-
-var test=this.props.id + ':0';
-console.log(test);
-var json='{' + this.props.id + ':' + 1 + '}';
-console.log(JSON.stringify(json));
-WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);}});
 
 
 
@@ -56890,6 +56933,10 @@ RCTWeiboPrivacyAndroid.updateState(url,jsondata);}};
 
 
 module.exports = WeiboPrivacyAndroid;
+});
+__d('image!common_checkbox_checked',function(global, require, module, exports) {  module.exports = {"__packager_asset":true,"path":"D:\\git_workspace\\react-native-for-eclipse\\demo-for-eclipse\\react_native_demo\\bin\\res\\crunch\\drawable\\common_checkbox_checked.png","uri":"common_checkbox_checked","width":54,"height":54,"deprecated":true};
+});
+__d('image!common_checkbox_unchecked',function(global, require, module, exports) {  module.exports = {"__packager_asset":true,"path":"D:\\git_workspace\\react-native-for-eclipse\\demo-for-eclipse\\react_native_demo\\bin\\res\\crunch\\drawable\\common_checkbox_unchecked.png","uri":"common_checkbox_unchecked","width":54,"height":54,"deprecated":true};
 });
 ;require("InitializeJavaScriptAppEngine");
 ;require("AwesomeProject/js/reactjs/Setting/privacySetting.android.js");
