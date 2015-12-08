@@ -1,5 +1,4 @@
-__DEV__ = 
-true;
+__DEV__ = true;
 
 
 __BUNDLE_START_TIME__ = Date.now();

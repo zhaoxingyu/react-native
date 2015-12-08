@@ -12,7 +12,7 @@ package com.facebook.react.devsupport;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
-import com.facebook.react.R;
+import com.sina.weibo.R;
 
 /**
  * Activity that display developers settings. Should be added to the debug manifest of the app. Can
