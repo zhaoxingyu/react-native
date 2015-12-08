@@ -51,13 +51,13 @@ var PrivacySettingPage = React.createClass({
   },
   
   shouldComponentUpdate:function(nextProps,nextState){
-	  console.log('shouldComponentUpdate: ' + nextState.currentCommentId + " prev id: " + this.state.currentCommentId);
+	  console.log('shouldComponentUpdate comment id: ' + nextState.currentCommentId + " prev id: " + this.state.currentCommentId);
 	  if(this.state.currentCommentId !== nextState.currentCommentId){
 		  var json = '{comment:'+nextState.currentCommentId+'}';
 		  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
 	  }
 
-	  console.log('shouldComponentUpdate: ' + nextState.currentMentionId + " prev id: " + this.state.currentMentionId);
+	  console.log('shouldComponentUpdate mention id: ' + nextState.currentMentionId + " prev id: " + this.state.currentMentionId);
 	  if(this.state.currentMentionId !== nextState.currentMentionId){
 		  var json = '{mention:'+nextState.currentMentionId+'}';
 		  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
