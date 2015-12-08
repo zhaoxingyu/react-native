@@ -59,9 +59,13 @@ try{
 
 mod.isInitialized = true;
 
+__DEV__ && BridgeProfiling().profile(id);
 
 
-mod.factory.call(global,global,require,mod.module,mod.module.exports);}
+
+mod.factory.call(global,global,require,mod.module,mod.module.exports);
+
+__DEV__ && BridgeProfiling().profileEnd();}
 catch(e) {
 mod.hasError = true;
 mod.isInitialized = false;
@@ -69,6 +73,16 @@ throw e;}
 
 
 return mod.module.exports;}
+
+
+var BridgeProfiling=__DEV__ && function(){
+var _BridgeProfiling;
+try{
+_BridgeProfiling = require('BridgeProfiling');}
+catch(e) {}
+
+return _BridgeProfiling && _BridgeProfiling.profile?
+_BridgeProfiling:{profile:function(){},profileEnd:function(){}};};
 
 
 global.__d = define;
@@ -509,7 +523,6 @@ error:3};
 
 
 function setupConsole(global){
-
 var originalConsole=global.console;
 
 if(!global.nativeLoggingHook){
@@ -518,16 +531,23 @@ return;}
 
 function getNativeLogFunction(level){
 return function(){
-var str=Array.prototype.map.call(arguments,function(arg){
+var str;
+if(arguments.length === 1 && typeof arguments[0] === 'string'){
+str = arguments[0];}else 
+{
+str = Array.prototype.map.call(arguments,function(arg){
 return inspect(arg,{depth:10});}).
-join(', ');
-if(str.slice(0,10) === "'Warning: " && level >= LOG_LEVELS.error){
+join(', ');}
+
+
+var logLevel=level;
+if(str.slice(0,9) === 'Warning: ' && logLevel >= LOG_LEVELS.error){
 
 
 
-level = LOG_LEVELS.warn;}
+logLevel = LOG_LEVELS.warn;}
 
-global.nativeLoggingHook(str,level);};}
+global.nativeLoggingHook(str,logLevel);};}
 
 
 
@@ -1166,7 +1186,7 @@ GLOBAL.document.createElement = null;}
 
 GLOBAL.MutationObserver = undefined;})(
 this);
-__d('AwesomeProject/js/Setting/privacySetting.android.js',function(global, require, module, exports) {  'use strict';
+__d('AwesomeProject/js/reactjs/Setting/privacySetting.android.js',function(global, require, module, exports) {  'use strict';
 var React=require('react-native/Libraries/react-native/react-native.js');var 
 
 AppRegistry=
@@ -1176,12 +1196,32 @@ AppRegistry=
 
 React.AppRegistry;var StyleSheet=React.StyleSheet;var Text=React.Text;var Image=React.Image;var View=React.View;
 
-var PrivacySettingPage=require('AwesomeProject/js/Setting/PrivacySetting.js');
+var PrivacySettingPage=require('AwesomeProject/js/reactjs/Setting/PrivacySetting.js');
+var WeiboPrivacyAndroid=require('WeiboPrivacyAndroid');
 
 var PrivacySetting=React.createClass({displayName:'PrivacySetting',
+getInitialState:function(){
+return {
+result:null};},
+
+
+
+componentWillMount:function(){var _this=this;
+console.log(WeiboPrivacyAndroid.Tag,'index componentWillMount');
+WeiboPrivacyAndroid.getStates("http://api.weibo.cn/2/setting/getprivacy",function(result){
+console.log(WeiboPrivacyAndroid.Tag,'index request states result:',result);
+_this.setState({
+result:JSON.parse(result)});});},
+
+
+
 render:function(){
+
+
+
+
 return (
-React.createElement(PrivacySettingPage,null));}});
+React.createElement(PrivacySettingPage,{result:this.state.result}));}});
 
 
 
@@ -1729,7 +1769,9 @@ polyfillGlobal('WebSocket',require('WebSocket'));}
 
 function setUpProfile(){
 if(__DEV__){
-require('BridgeProfiling').swizzleReactPerf();}}
+var BridgeProfiling=require('BridgeProfiling');
+BridgeProfiling.swizzleReactPerf();
+BridgeProfiling.attachToRelayProfiler();}}
 
 
 
@@ -1749,9 +1791,11 @@ Number.MIN_SAFE_INTEGER = Number.MIN_SAFE_INTEGER || -(Math.pow(2,53) - 1);}
 
 function setUpDevTools(){
 
-if(__DEV__ && !window.document && require('Platform').OS === 'ios'){
+if(__DEV__){
+if(!window.document && require('Platform').OS === 'ios'){
 var setupDevtools=require('setupDevtools');
-setupDevtools();}}
+setupDevtools();}}}
+
 
 
 
@@ -1771,7 +1815,9 @@ setUpDevTools();
 
 
 
-require('RCTDebugComponentOwnership');
+if(__DEV__){
+require('RCTDebugComponentOwnership');}
+
 require('RCTDeviceEventEmitter');
 require('PerformanceLogger');
 });
@@ -2641,6 +2687,8 @@ localModules && this._genLookupTables(
 this._genModulesConfig(localModules),this._moduleTable,this._methodTable);
 
 
+this._copyNativeComponentConstants(this.RemoteModules);
+
 this._debugInfo = {};
 this._remoteModuleTable = {};
 this._remoteMethodTable = {};
@@ -2752,7 +2800,31 @@ console.log('N->JS : <callback for ' + _module + '.' + method + '>(' + JSON.stri
 this._callbacks[cbID & ~1] = null;
 this._callbacks[cbID | 1] = null;
 callback.apply(null,args);
-BridgeProfiling.profileEnd();}},{key:'_genModulesConfig',value:function _genModulesConfig(
+BridgeProfiling.profileEnd();}},{key:'_copyNativeComponentConstants',value:function _copyNativeComponentConstants(
+
+
+
+
+
+
+
+
+
+
+
+remoteModules){
+var UIManager=remoteModules.RCTUIManager;
+UIManager && Object.keys(UIManager).forEach(function(viewName){
+var viewConfig=UIManager[viewName];
+if(viewConfig.Manager){
+var viewManager=remoteModules[viewConfig.Manager];
+viewManager && Object.keys(viewManager).forEach(function(key){
+var value=viewManager[key];
+if(typeof value !== 'function'){
+if(!viewConfig.Constants){
+viewConfig.Constants = {};}
+
+viewConfig.Constants[key] = value;}});}});}},{key:'_genModulesConfig',value:function _genModulesConfig(
 
 
 
@@ -2969,7 +3041,83 @@ return ret;};},
 
 
 swizzleReactPerf:function(){
-ReactPerf().injection.injectMeasure(BridgeProfiling.reactPerfMeasure);}};
+ReactPerf().injection.injectMeasure(BridgeProfiling.reactPerfMeasure);},
+
+
+attachToRelayProfiler:function(){
+
+
+
+
+
+try{
+var rpName='RelayProfiler';
+var RelayProfiler=require(rpName);
+RelayProfiler.attachProfileHandler('*',function(name){
+BridgeProfiling.profile(name);
+return function(){
+BridgeProfiling.profileEnd();};});}
+
+
+catch(err) {}},
+
+
+
+
+swizzleJSON:function(){
+BridgeProfiling.measureMethods(JSON,'JSON',[
+'parse',
+'stringify']);},
+
+
+
+
+
+
+
+
+
+
+
+measureMethods:function(object,objectName,methodNames){
+if(!__DEV__){
+return;}
+
+
+methodNames.forEach(function(methodName){
+object[methodName] = BridgeProfiling.measure(
+objectName,
+methodName,
+object[methodName]);});},
+
+
+
+
+
+
+
+
+
+
+
+
+
+measure:function(objName,fnName,func){
+if(!__DEV__){
+return func;}
+
+
+var profileName=objName + '.' + fnName;
+return function(){
+if(!_enabled){
+return func.apply(this,arguments);}
+
+
+BridgeProfiling.profile(profileName);
+var ret=func.apply(this,arguments);
+BridgeProfiling.profileEnd();
+return ret;};}};
+
 
 
 
@@ -3122,6 +3270,7 @@ var invariant=require('invariant');
 var keyMirror=require('keyMirror');
 var performanceNow=require('performanceNow');
 var warning=require('warning');
+var BridgeProfiling=require('BridgeProfiling');
 
 
 
@@ -3219,11 +3368,32 @@ throw errors[0];}},
 
 
 
+callImmediatesPass:function(){
+BridgeProfiling.profile('JSTimersExecution.callImmediatesPass()');
+
+
+
+if(JSTimersExecution.immediates.length > 0){
+var passImmediates=JSTimersExecution.immediates.slice();
+JSTimersExecution.immediates = [];
+
+passImmediates.forEach(function(timerID){
+JSTimersExecution.callTimer(timerID);});}
+
+
+
+BridgeProfiling.profileEnd();
+
+return JSTimersExecution.immediates.length > 0;},
+
+
+
+
+
+
 callImmediates:function(){
 JSTimersExecution.errors = null;
-while(JSTimersExecution.immediates.length !== 0) {
-JSTimersExecution.callTimer(JSTimersExecution.immediates.shift());}
-
+while(JSTimersExecution.callImmediatesPass()) {}
 if(JSTimersExecution.errors){
 JSTimersExecution.errors.forEach(function(error){return (
 require('JSTimers').setTimeout(function(){throw error;},0));});}},
@@ -7713,15 +7883,7 @@ headerArray.push([name,headers[name]]);}
 return headerArray;}var 
 
 
-XMLHttpRequest=(function(_XMLHttpRequestBase){babelHelpers.inherits(XMLHttpRequest,_XMLHttpRequestBase);
-
-
-
-function XMLHttpRequest(){babelHelpers.classCallCheck(this,XMLHttpRequest);var _this=babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(XMLHttpRequest).call(this));
-
-_this._requestId = null;return _this;}babelHelpers.createClass(XMLHttpRequest,[{key:'sendImpl',value:function sendImpl(
-
-
+XMLHttpRequest=(function(_XMLHttpRequestBase){babelHelpers.inherits(XMLHttpRequest,_XMLHttpRequestBase);function XMLHttpRequest(){babelHelpers.classCallCheck(this,XMLHttpRequest);return babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(XMLHttpRequest).apply(this,arguments));}babelHelpers.createClass(XMLHttpRequest,[{key:'sendImpl',value:function sendImpl(
 method,url,headers,data){
 var body;
 if(typeof data === 'string'){
@@ -7737,17 +7899,15 @@ return part;})};}else
 body = data;}
 
 
-this._requestId = RCTNetworking.sendRequest(
+var useIncrementalUpdates=this.onreadystatechange?true:false;
+var requestId=RCTNetworking.sendRequest(
 method,
 url,
 convertHeadersMapToArray(headers),
 body,
-this.callback.bind(this));}},{key:'abortImpl',value:function abortImpl()
+useIncrementalUpdates);
 
-
-
-{
-this._requestId && RCTNetworking.abortRequest(this._requestId);}}]);return XMLHttpRequest;})(XMLHttpRequestBase);
+this.didCreateRequest(requestId);}}]);return XMLHttpRequest;})(XMLHttpRequestBase);
 
 
 
@@ -7868,7 +8028,7 @@ return _requestId++;};var
 
 RCTNetworking=(function(){function RCTNetworking(){babelHelpers.classCallCheck(this,RCTNetworking);}babelHelpers.createClass(RCTNetworking,null,[{key:'sendRequest',value:function sendRequest(
 
-method,url,headers,data,callback){
+method,url,headers,data,useIncrementalUpdates){
 var requestId=generateRequestId();
 RCTNetworkingNative.sendRequest(
 method,
@@ -7876,18 +8036,22 @@ url,
 requestId,
 headers,
 data,
-callback);
+useIncrementalUpdates);
 return requestId;}},{key:'abortRequest',value:function abortRequest(
 
 
 requestId){
-RCTNetworkingNative.abortRequest(requestId);}}]);return RCTNetworking;})();
+RCTNetworkingNative.abortRequest(requestId);}},{key:'clearCookies',value:function clearCookies(
+
+
+callback){
+RCTNetworkingNative.clearCookies(callback);}}]);return RCTNetworking;})();
 
 
 
 module.exports = RCTNetworking;
 });
-__d('XMLHttpRequestBase',function(global, require, module, exports) {  'use strict';var 
+__d('XMLHttpRequestBase',function(global, require, module, exports) {  'use strict';
 
 
 
@@ -7899,11 +8063,21 @@ __d('XMLHttpRequestBase',function(global, require, module, exports) {  'use stri
 
 
 
+
+var RCTNetworking=require('RCTNetworking');
+var RCTDeviceEventEmitter=require('RCTDeviceEventEmitter');var 
 
 
 
 
 XMLHttpRequestBase=(function(){
+
+
+
+
+
+
+
 
 
 
@@ -7949,9 +8123,81 @@ this.responseHeaders = undefined;
 this.responseText = '';
 this.status = 0;
 
+this._requestId = null;
+
 this._headers = {};
 this._sent = false;
-this._lowerCaseResponseHeaders = {};}},{key:'getAllResponseHeaders',value:function getAllResponseHeaders()
+this._lowerCaseResponseHeaders = {};
+
+this._clearSubscriptions();}},{key:'didCreateRequest',value:function didCreateRequest(
+
+
+requestId){var _this=this;
+this._requestId = requestId;
+this._subscriptions.push(RCTDeviceEventEmitter.addListener(
+'didSendNetworkData',
+function(args){var _didUploadProgress2;return (_didUploadProgress2 = _this._didUploadProgress).call.apply(_didUploadProgress2,[_this].concat(babelHelpers.toConsumableArray(args)));}));
+
+this._subscriptions.push(RCTDeviceEventEmitter.addListener(
+'didReceiveNetworkResponse',
+function(args){var _didReceiveResponse2;return (_didReceiveResponse2 = _this._didReceiveResponse).call.apply(_didReceiveResponse2,[_this].concat(babelHelpers.toConsumableArray(args)));}));
+
+this._subscriptions.push(RCTDeviceEventEmitter.addListener(
+'didReceiveNetworkData',
+function(args){var _didReceiveData2;return (_didReceiveData2 = _this._didReceiveData).call.apply(_didReceiveData2,[_this].concat(babelHelpers.toConsumableArray(args)));}));
+
+this._subscriptions.push(RCTDeviceEventEmitter.addListener(
+'didCompleteNetworkResponse',
+function(args){var _didCompleteResponse2;return (_didCompleteResponse2 = _this._didCompleteResponse).call.apply(_didCompleteResponse2,[_this].concat(babelHelpers.toConsumableArray(args)));}));}},{key:'_didUploadProgress',value:function _didUploadProgress(
+
+
+
+requestId,progress,total){
+if(requestId === this._requestId && this.upload && this.upload.onprogress){
+var event={
+lengthComputable:true,
+loaded:progress,
+total:total};
+
+this.upload.onprogress(event);}}},{key:'_didReceiveResponse',value:function _didReceiveResponse(
+
+
+
+requestId,status,responseHeaders){
+if(requestId === this._requestId){
+this.status = status;
+this.setResponseHeaders(responseHeaders);
+this.setReadyState(this.HEADERS_RECEIVED);}}},{key:'_didReceiveData',value:function _didReceiveData(
+
+
+
+requestId,responseText){
+if(requestId === this._requestId){
+if(!this.responseText){
+this.responseText = responseText;}else 
+{
+this.responseText += responseText;}
+
+this.setReadyState(this.LOADING);}}},{key:'_didCompleteResponse',value:function _didCompleteResponse(
+
+
+
+requestId,error){
+if(requestId === this._requestId){
+if(error){
+this.responseText = error;}
+
+this._clearSubscriptions();
+this._requestId = null;
+this.setReadyState(this.DONE);}}},{key:'_clearSubscriptions',value:function _clearSubscriptions()
+
+
+
+{
+(this._subscriptions || []).forEach(function(sub){
+sub.remove();});
+
+this._subscriptions = [];}},{key:'getAllResponseHeaders',value:function getAllResponseHeaders()
 
 
 {
@@ -7994,11 +8240,7 @@ this.setReadyState(this.OPENED);}},{key:'sendImpl',value:function sendImpl(
 
 
 method,url,headers,data){
-throw new Error('Subclass must define sendImpl method');}},{key:'abortImpl',value:function abortImpl()
-
-
-{
-throw new Error('Subclass must define abortImpl method');}},{key:'send',value:function send(
+throw new Error('Subclass must define sendImpl method');}},{key:'send',value:function send(
 
 
 data){
@@ -8014,7 +8256,9 @@ this.sendImpl(this._method,this._url,this._headers,data);}},{key:'abort',value:f
 
 {
 this._aborted = true;
-this.abortImpl();
+if(this._requestId){
+RCTNetworking.abortRequest(this._requestId);}
+
 
 
 if(!(this.readyState === this.UNSENT || 
@@ -8024,17 +8268,7 @@ this._reset();
 this.setReadyState(this.DONE);}
 
 
-this._reset();}},{key:'callback',value:function callback(
-
-
-status,responseHeaders,responseText){
-if(this._aborted){
-return;}
-
-this.status = status;
-this.setResponseHeaders(responseHeaders || {});
-this.responseText = responseText;
-this.setReadyState(this.DONE);}},{key:'setResponseHeaders',value:function setResponseHeaders(
+this._reset();}},{key:'setResponseHeaders',value:function setResponseHeaders(
 
 
 responseHeaders){
@@ -8073,6 +8307,396 @@ onload(null);}}}]);return XMLHttpRequestBase;})();
 
 
 module.exports = XMLHttpRequestBase;
+});
+__d('RCTDeviceEventEmitter',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+var EventEmitter=require('EventEmitter');
+
+var RCTDeviceEventEmitter=new EventEmitter();
+
+module.exports = RCTDeviceEventEmitter;
+});
+__d('EventEmitter',function(global, require, module, exports) {  var 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+EmitterSubscription=require('EmitterSubscription');
+var ErrorUtils=require('ErrorUtils');
+var EventSubscriptionVendor=require('EventSubscriptionVendor');
+var emptyFunction=require('emptyFunction');
+var invariant=require('invariant');var 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+EventEmitter=(function(){
+
+
+
+function EventEmitter(){babelHelpers.classCallCheck(this,EventEmitter);
+this._subscriber = new EventSubscriptionVendor();}babelHelpers.createClass(EventEmitter,[{key:'addListener',value:function addListener(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+eventType,listener,context){
+return this._subscriber.addSubscription(
+eventType,
+new EmitterSubscription(this._subscriber,listener,context));}},{key:'once',value:function once(
+
+
+
+
+
+
+
+
+
+
+
+
+eventType,listener,context){
+var emitter=this;
+return this.addListener(eventType,function(){
+emitter.removeCurrentListener();
+listener.apply(context,arguments);});}},{key:'removeAllListeners',value:function removeAllListeners(
+
+
+
+
+
+
+
+
+
+
+eventType){
+this._subscriber.removeAllSubscriptions(eventType);}},{key:'removeCurrentListener',value:function removeCurrentListener()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+invariant(
+!!this._currentSubscription,
+'Not in an emitting cycle; there is no current subscription');
+
+this._subscriber.removeSubscription(this._currentSubscription);}},{key:'listeners',value:function listeners(
+
+
+
+
+
+
+
+
+
+eventType){
+var subscriptions=this._subscriber.getSubscriptionsForType(eventType);
+return subscriptions?
+subscriptions.filter(emptyFunction.thatReturnsTrue).map(
+function(subscription){
+return subscription.listener;}):
+
+[];}},{key:'emit',value:function emit(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+eventType){
+var subscriptions=this._subscriber.getSubscriptionsForType(eventType);
+if(subscriptions){
+var keys=Object.keys(subscriptions);
+for(var ii=0;ii < keys.length;ii++) {
+var key=keys[ii];
+var subscription=subscriptions[key];
+
+
+if(subscription){
+this._currentSubscription = subscription;
+
+ErrorUtils.applyWithGuard(
+subscription.listener,
+subscription.context,
+Array.prototype.slice.call(arguments,1),
+null,
+'EventEmitter:' + eventType);}}
+
+
+
+this._currentSubscription = null;}}}]);return EventEmitter;})();
+
+
+
+
+module.exports = EventEmitter;
+});
+__d('EmitterSubscription',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var EventSubscription=require('EventSubscription');var 
+
+
+
+
+EmitterSubscription=(function(_EventSubscription){babelHelpers.inherits(EmitterSubscription,_EventSubscription);
+
+
+
+
+
+
+
+
+
+function EmitterSubscription(subscriber,listener,context){babelHelpers.classCallCheck(this,EmitterSubscription);var _this=babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(EmitterSubscription).call(this,
+subscriber));
+_this.listener = listener;
+_this.context = context;return _this;}return EmitterSubscription;})(EventSubscription);
+
+
+
+module.exports = EmitterSubscription;
+});
+__d('EventSubscription',function(global, require, module, exports) {  'use strict';var 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+EventSubscription=(function(){
+
+
+
+
+
+function EventSubscription(subscriber){babelHelpers.classCallCheck(this,EventSubscription);
+this.subscriber = subscriber;}babelHelpers.createClass(EventSubscription,[{key:'remove',value:function remove()
+
+
+
+
+
+{
+this.subscriber.removeSubscription(this);}}]);return EventSubscription;})();
+
+
+
+module.exports = EventSubscription;
+});
+__d('EventSubscriptionVendor',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var invariant=require('invariant');var 
+
+
+
+
+
+EventSubscriptionVendor=(function(){
+
+function EventSubscriptionVendor(){babelHelpers.classCallCheck(this,EventSubscriptionVendor);
+this._subscriptionsForType = {};
+this._currentSubscription = null;}babelHelpers.createClass(EventSubscriptionVendor,[{key:'addSubscription',value:function addSubscription(
+
+
+
+
+
+
+
+
+
+eventType,subscription){
+invariant(
+subscription.subscriber === this,
+'The subscriber of the subscription is incorrectly set.');
+if(!this._subscriptionsForType[eventType]){
+this._subscriptionsForType[eventType] = [];}
+
+var key=this._subscriptionsForType[eventType].length;
+this._subscriptionsForType[eventType].push(subscription);
+subscription.eventType = eventType;
+subscription.key = key;
+return subscription;}},{key:'removeAllSubscriptions',value:function removeAllSubscriptions(
+
+
+
+
+
+
+
+
+eventType){
+if(eventType === undefined){
+this._subscriptionsForType = {};}else 
+{
+delete this._subscriptionsForType[eventType];}}},{key:'removeSubscription',value:function removeSubscription(
+
+
+
+
+
+
+
+
+
+subscription){
+var eventType=subscription.eventType;
+var key=subscription.key;
+
+var subscriptionsForType=this._subscriptionsForType[eventType];
+if(subscriptionsForType){
+delete subscriptionsForType[key];}}},{key:'getSubscriptionsForType',value:function getSubscriptionsForType(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+eventType){
+return this._subscriptionsForType[eventType];}}]);return EventSubscriptionVendor;})();
+
+
+
+module.exports = EventSubscriptionVendor;
 });
 __d('fetch',function(global, require, module, exports) {  'use strict';
 
@@ -8522,6 +9146,17 @@ var updatesEnabled=false;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 var Geolocation={
 
 
@@ -8609,396 +9244,6 @@ subscriptions = [];}}};
 
 
 module.exports = Geolocation;
-});
-__d('RCTDeviceEventEmitter',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-var EventEmitter=require('EventEmitter');
-
-var RCTDeviceEventEmitter=new EventEmitter();
-
-module.exports = RCTDeviceEventEmitter;
-});
-__d('EventEmitter',function(global, require, module, exports) {  var 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-EmitterSubscription=require('EmitterSubscription');
-var ErrorUtils=require('ErrorUtils');
-var EventSubscriptionVendor=require('EventSubscriptionVendor');
-var emptyFunction=require('emptyFunction');
-var invariant=require('invariant');var 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-EventEmitter=(function(){
-
-
-
-function EventEmitter(){babelHelpers.classCallCheck(this,EventEmitter);
-this._subscriber = new EventSubscriptionVendor();}babelHelpers.createClass(EventEmitter,[{key:'addListener',value:function addListener(
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-eventType,listener,context){
-return this._subscriber.addSubscription(
-eventType,
-new EmitterSubscription(this._subscriber,listener,context));}},{key:'once',value:function once(
-
-
-
-
-
-
-
-
-
-
-
-
-eventType,listener,context){
-var emitter=this;
-return this.addListener(eventType,function(){
-emitter.removeCurrentListener();
-listener.apply(context,arguments);});}},{key:'removeAllListeners',value:function removeAllListeners(
-
-
-
-
-
-
-
-
-
-
-eventType){
-this._subscriber.removeAllSubscriptions(eventType);}},{key:'removeCurrentListener',value:function removeCurrentListener()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{
-invariant(
-!!this._currentSubscription,
-'Not in an emitting cycle; there is no current subscription');
-
-this._subscriber.removeSubscription(this._currentSubscription);}},{key:'listeners',value:function listeners(
-
-
-
-
-
-
-
-
-
-eventType){
-var subscriptions=this._subscriber.getSubscriptionsForType(eventType);
-return subscriptions?
-subscriptions.filter(emptyFunction.thatReturnsTrue).map(
-function(subscription){
-return subscription.listener;}):
-
-[];}},{key:'emit',value:function emit(
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-eventType){
-var subscriptions=this._subscriber.getSubscriptionsForType(eventType);
-if(subscriptions){
-var keys=Object.keys(subscriptions);
-for(var ii=0;ii < keys.length;ii++) {
-var key=keys[ii];
-var subscription=subscriptions[key];
-
-
-if(subscription){
-this._currentSubscription = subscription;
-
-ErrorUtils.applyWithGuard(
-subscription.listener,
-subscription.context,
-Array.prototype.slice.call(arguments,1),
-null,
-'EventEmitter:' + eventType);}}
-
-
-
-this._currentSubscription = null;}}}]);return EventEmitter;})();
-
-
-
-
-module.exports = EventEmitter;
-});
-__d('EmitterSubscription',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var EventSubscription=require('EventSubscription');var 
-
-
-
-
-EmitterSubscription=(function(_EventSubscription){babelHelpers.inherits(EmitterSubscription,_EventSubscription);
-
-
-
-
-
-
-
-
-
-function EmitterSubscription(subscriber,listener,context){babelHelpers.classCallCheck(this,EmitterSubscription);var _this=babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(EmitterSubscription).call(this,
-subscriber));
-_this.listener = listener;
-_this.context = context;return _this;}return EmitterSubscription;})(EventSubscription);
-
-
-
-module.exports = EmitterSubscription;
-});
-__d('EventSubscription',function(global, require, module, exports) {  'use strict';var 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-EventSubscription=(function(){
-
-
-
-
-
-function EventSubscription(subscriber){babelHelpers.classCallCheck(this,EventSubscription);
-this.subscriber = subscriber;}babelHelpers.createClass(EventSubscription,[{key:'remove',value:function remove()
-
-
-
-
-
-{
-this.subscriber.removeSubscription(this);}}]);return EventSubscription;})();
-
-
-
-module.exports = EventSubscription;
-});
-__d('EventSubscriptionVendor',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var invariant=require('invariant');var 
-
-
-
-
-
-EventSubscriptionVendor=(function(){
-
-function EventSubscriptionVendor(){babelHelpers.classCallCheck(this,EventSubscriptionVendor);
-this._subscriptionsForType = {};
-this._currentSubscription = null;}babelHelpers.createClass(EventSubscriptionVendor,[{key:'addSubscription',value:function addSubscription(
-
-
-
-
-
-
-
-
-
-eventType,subscription){
-invariant(
-subscription.subscriber === this,
-'The subscriber of the subscription is incorrectly set.');
-if(!this._subscriptionsForType[eventType]){
-this._subscriptionsForType[eventType] = [];}
-
-var key=this._subscriptionsForType[eventType].length;
-this._subscriptionsForType[eventType].push(subscription);
-subscription.eventType = eventType;
-subscription.key = key;
-return subscription;}},{key:'removeAllSubscriptions',value:function removeAllSubscriptions(
-
-
-
-
-
-
-
-
-eventType){
-if(eventType === undefined){
-this._subscriptionsForType = {};}else 
-{
-delete this._subscriptionsForType[eventType];}}},{key:'removeSubscription',value:function removeSubscription(
-
-
-
-
-
-
-
-
-
-subscription){
-var eventType=subscription.eventType;
-var key=subscription.key;
-
-var subscriptionsForType=this._subscriptionsForType[eventType];
-if(subscriptionsForType){
-delete subscriptionsForType[key];}}},{key:'getSubscriptionsForType',value:function getSubscriptionsForType(
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-eventType){
-return this._subscriptionsForType[eventType];}}]);return EventSubscriptionVendor;})();
-
-
-
-module.exports = EventSubscriptionVendor;
 });
 __d('logError',function(global, require, module, exports) {  'use strict';
 
@@ -10279,6 +10524,7 @@ var RCTUIManager=require('NativeModules').UIManager;
 
 var ReactElement=require('ReactElement');
 var ReactNativeTagHandles=require('ReactNativeTagHandles');
+var ReactNativeViewPool=require('ReactNativeViewPool');
 var ReactPerf=require('ReactPerf');
 var ReactReconciler=require('ReactReconciler');
 var ReactUpdateQueue=require('ReactUpdateQueue');
@@ -10479,7 +10725,8 @@ containerTag)
 {
 ReactNativeMount.unmountComponentAtNode(containerTag);
 
-RCTUIManager.removeRootView(containerTag);},
+RCTUIManager.removeRootView(containerTag);
+ReactNativeViewPool.clearPoolForRootView(containerTag);},
 
 
 
@@ -10950,6 +11197,769 @@ rootNodeIDToTag:{}};
 
 
 module.exports = ReactNativeTagHandles;
+});
+__d('ReactNativeViewPool',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+var ReactNativeTagHandles=require('ReactNativeTagHandles');
+var ReactNativeAttributePayload=require('ReactNativeAttributePayload');
+var RCTUIManager=require('NativeModules').UIManager;
+var Platform=require('Platform');
+
+var deepFreezeAndThrowOnMutationInDev=require('deepFreezeAndThrowOnMutationInDev');
+var emptyFunction=require('emptyFunction');
+var flattenStyle=require('flattenStyle');
+
+var EMPTY_POOL=[[]];
+
+var ENABLED=!!RCTUIManager.dropViews;
+
+
+var TAGS_IDX=0;
+var KEYS_IDX=1;
+var PROPS_IDX=2;
+
+var _pools={};
+var _poolSize={};
+
+var layoutOnlyProps=RCTUIManager.layoutOnlyProps;
+
+function isCollapsableForStyle(style){
+var flatStyle=flattenStyle(style);
+for(var styleKey in flatStyle) {
+if(layoutOnlyProps[styleKey] !== true){
+return false;}}
+
+
+return true;}
+
+
+function isCollapsable(viewRef){
+var props=viewRef._currentElement.props;
+if(props.collapsable !== undefined && !props.collapsable){
+return false;}
+
+var validAttributes=viewRef.viewConfig.validAttributes;
+for(var propKey in props) {
+if(!!validAttributes[propKey] && propKey !== 'style' && propKey !== 'collapsable'){
+return false;}}
+
+
+return !props.style || isCollapsableForStyle(viewRef._currentElement.props.style);}
+
+
+function enqueueCreate(viewRef,rootTag){
+var tag=ReactNativeTagHandles.allocateTag();
+
+if(__DEV__){
+deepFreezeAndThrowOnMutationInDev(viewRef._currentElement.props);}
+
+
+var updatePayload=ReactNativeAttributePayload.create(
+viewRef._currentElement.props,
+viewRef.viewConfig.validAttributes);
+
+
+RCTUIManager.createView(
+tag,
+viewRef.viewConfig.uiViewClassName,
+rootTag,
+updatePayload);
+
+
+return tag;}
+
+
+function getViewTag(viewRef){
+return ReactNativeTagHandles.mostRecentMountedNodeHandleForRootNodeID(viewRef._rootNodeID);}
+
+
+function getViewProps(viewRef){
+return viewRef._currentElement.props;}
+
+
+function getViewValidAttributes(viewRef){
+return viewRef.viewConfig.validAttributes;}
+
+
+function getRootViewTag(viewRef){
+var nativeTopRootID=ReactNativeTagHandles.getNativeTopRootIDFromNodeID(viewRef._rootNodeID);
+return ReactNativeTagHandles.rootNodeIDToTag[nativeTopRootID];}
+
+
+function poolKey(viewRef){
+var viewClass=viewRef.viewConfig.uiViewClassName;
+if(Platform.OS === 'android' && viewClass === 'RCTView'){
+return isCollapsable(viewRef)?'CollapsedRCTView':'RCTView';}
+
+return viewClass;}var 
+
+
+ReactNativeViewPool=(function(){
+function ReactNativeViewPool(){babelHelpers.classCallCheck(this,ReactNativeViewPool);
+this._pool = {};
+this._poolQueue = {};
+this._addToPool = [[],[],[]];
+this._viewsToDelete = [];
+if(__DEV__){
+this._recycleStats = {};
+this._deleteStats = {};}}babelHelpers.createClass(ReactNativeViewPool,[{key:'onReconcileTransactionClose',value:function onReconcileTransactionClose()
+
+
+
+{
+
+if(this._viewsToDelete.length > 0){
+RCTUIManager.dropViews(this._viewsToDelete);}
+
+var addToPoolTags=this._addToPool[TAGS_IDX];
+var addToPoolKeys=this._addToPool[KEYS_IDX];
+var addToPoolProps=this._addToPool[PROPS_IDX];
+for(var i=addToPoolTags.length - 1;i >= 0;i--) {
+var nativeTag=addToPoolTags[i];
+var key=addToPoolKeys[i];
+var props=addToPoolProps[i];
+var views=this._pool[key] || [[],[]];
+views[0].push(nativeTag);
+views[1].push(props);
+this._pool[key] = views;}
+
+this._viewsToDelete = [];
+this._addToPool = [[],[],[]];
+this._poolQueue = {};}},{key:'acquire',value:function acquire(
+
+
+viewRef,rootTag){
+var key=poolKey(viewRef);
+if((this._pool[key] || EMPTY_POOL)[0].length){
+var views=this._pool[key];
+var nativeTag=views[0].pop();
+var oldProps=views[1].pop();
+var updatePayload=ReactNativeAttributePayload.diff(
+oldProps,
+getViewProps(viewRef),
+getViewValidAttributes(viewRef));
+
+if(__DEV__){
+this._recycleStats[key] = (this._recycleStats[key] || 0) + 1;}
+
+
+if(updatePayload){
+RCTUIManager.updateView(
+nativeTag,
+viewRef.viewConfig.uiViewClassName,
+updatePayload);}
+
+
+return nativeTag;}else 
+{
+
+return enqueueCreate(viewRef,rootTag);}}},{key:'release',value:function release(
+
+
+
+viewRef){
+var key=poolKey(viewRef);
+var nativeTag=getViewTag(viewRef);
+var pooledCount=(this._pool[key] || EMPTY_POOL)[0].length + (this._poolQueue[key] || 0);
+if(pooledCount < (_poolSize[key] || 0)){
+
+
+
+this._addToPool[TAGS_IDX].push(nativeTag);
+this._addToPool[KEYS_IDX].push(key);
+this._addToPool[PROPS_IDX].push(getViewProps(viewRef));
+this._poolQueue[key] = (this._poolQueue[key] || 0) + 1;}else 
+{
+if(__DEV__){
+if(_poolSize[key]){
+this._deleteStats[key] = (this._deleteStats[key] || 0) + 1;}}
+
+
+this._viewsToDelete.push(nativeTag);}}},{key:'clear',value:function clear()
+
+
+
+{
+for(var key in this._pool) {
+var poolTags=this._pool[key][0];
+for(var i=poolTags.length - 1;i >= 0;i--) {
+this._viewsToDelete.push(poolTags[i]);}}
+
+
+var addToPoolTags=this._addToPool[0];
+for(var i=addToPoolTags.length - 1;i >= 0;i--) {
+this._viewsToDelete.push(addToPoolTags[i]);}
+
+this._addToPool = [[],[],[]];
+this.onReconcileTransactionClose();}},{key:'printStats',value:function printStats()
+
+
+{
+if(__DEV__){
+console.log('Stats',this._recycleStats,this._deleteStats);}}}]);return ReactNativeViewPool;})();
+
+
+
+
+module.exports = {
+
+onReconcileTransactionClose:function(){
+if(ENABLED){
+for(var pool in _pools) {
+_pools[pool].onReconcileTransactionClose();}}},
+
+
+
+
+acquire:function(viewRef){
+var rootTag=getRootViewTag(viewRef);
+if(ENABLED){
+var pool=_pools[rootTag];
+if(!pool){
+pool = _pools[rootTag] = new ReactNativeViewPool();}
+
+return pool.acquire(viewRef,rootTag);}else 
+{
+return enqueueCreate(viewRef,rootTag);}},
+
+
+
+release:ENABLED?function(viewRef){
+var pool=_pools[getRootViewTag(viewRef)];
+if(pool){
+pool.release(viewRef);}}:
+
+emptyFunction,
+
+clearPoolForRootView:ENABLED?function(rootID){
+var pool=_pools[rootID];
+if(pool){
+pool.clear();
+delete _pools[rootID];}}:
+
+emptyFunction,
+
+configure:function(pool_size){
+_poolSize = pool_size;},
+
+
+printStats:function(){
+if(__DEV__){
+console.log('Pool size',_poolSize);
+for(var pool in _pools) {
+_pools[pool].onReconcileTransactionClose();}}}};
+});
+__d('ReactNativeAttributePayload',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+var Platform=require('Platform');
+
+var deepDiffer=require('deepDiffer');
+var styleDiffer=require('styleDiffer');
+var flattenStyle=require('flattenStyle');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function translateKey(propKey){
+if(propKey === 'transform'){
+
+
+
+
+if(Platform.OS === 'android'){
+return 'decomposedMatrix';}else 
+{
+return 'transformMatrix';}}
+
+
+return propKey;}
+
+
+function defaultDiffer(prevProp,nextProp){
+if(typeof nextProp !== 'object' || nextProp === null){
+
+return true;}else 
+{
+
+return deepDiffer(prevProp,nextProp);}}
+
+
+
+function diffNestedProperty(
+updatePayload,
+prevProp,
+nextProp,
+validAttributes)
+{
+
+
+
+
+
+if(!styleDiffer(prevProp,nextProp)){
+return updatePayload;}
+
+
+
+
+var previousFlattenedStyle=flattenStyle(prevProp);
+var nextFlattenedStyle=flattenStyle(nextProp);
+
+if(!previousFlattenedStyle || !nextFlattenedStyle){
+if(nextFlattenedStyle){
+return addProperties(
+updatePayload,
+nextFlattenedStyle,
+validAttributes);}
+
+
+if(previousFlattenedStyle){
+return clearProperties(
+updatePayload,
+previousFlattenedStyle,
+validAttributes);}
+
+
+return updatePayload;}
+
+
+
+return diffProperties(
+updatePayload,
+previousFlattenedStyle,
+nextFlattenedStyle,
+validAttributes);}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function clearNestedProperty(
+updatePayload,
+prevProp,
+validAttributes)
+{
+
+return diffNestedProperty(updatePayload,prevProp,{},validAttributes);}
+
+
+
+
+
+
+
+
+function diffProperties(
+updatePayload,
+prevProps,
+nextProps,
+validAttributes)
+{
+var attributeConfig;
+var nextProp;
+var prevProp;
+
+for(var propKey in nextProps) {
+attributeConfig = validAttributes[propKey];
+if(!attributeConfig){
+continue;}
+
+
+var altKey=translateKey(propKey);
+if(!validAttributes[altKey]){
+
+altKey = propKey;}
+
+
+if(updatePayload && updatePayload[altKey] !== undefined){
+
+
+continue;}
+
+prevProp = prevProps[propKey];
+nextProp = nextProps[propKey];
+
+
+
+if(typeof nextProp === 'function'){
+nextProp = true;
+
+
+if(typeof prevProp === 'function'){
+prevProp = true;}}
+
+
+
+if(prevProp === nextProp){
+continue;}
+
+
+
+if(typeof attributeConfig !== 'object'){
+
+if(defaultDiffer(prevProp,nextProp)){
+
+(updatePayload || (updatePayload = {}))[altKey] = nextProp;}}else 
+
+if(typeof attributeConfig.diff === 'function' || 
+typeof attributeConfig.process === 'function'){
+
+var shouldUpdate=prevProp === undefined || (
+typeof attributeConfig.diff === 'function'?
+attributeConfig.diff(prevProp,nextProp):
+defaultDiffer(prevProp,nextProp));
+
+if(shouldUpdate){
+var nextValue=typeof attributeConfig.process === 'function'?
+attributeConfig.process(nextProp):
+nextProp;
+(updatePayload || (updatePayload = {}))[altKey] = nextValue;}}else 
+
+{
+
+updatePayload = diffNestedProperty(
+updatePayload,
+prevProp,
+nextProp,
+attributeConfig);}}
+
+
+
+
+
+
+
+for(var propKey in prevProps) {
+if(nextProps[propKey] !== undefined){
+continue;}
+
+attributeConfig = validAttributes[propKey];
+if(!attributeConfig){
+continue;}
+
+
+prevProp = prevProps[propKey];
+if(prevProp === undefined){
+continue;}
+
+
+if(typeof attributeConfig !== 'object' || 
+typeof attributeConfig.diff === 'function' || 
+typeof attributeConfig.process === 'function'){
+
+
+
+(updatePayload || (updatePayload = {}))[translateKey(propKey)] = null;}else 
+{
+
+
+
+updatePayload = clearNestedProperty(
+updatePayload,
+prevProp,
+attributeConfig);}}
+
+
+
+return updatePayload;}
+
+
+
+
+
+function addProperties(
+updatePayload,
+props,
+validAttributes)
+{
+return diffProperties(updatePayload,{},props,validAttributes);}
+
+
+
+
+
+
+function clearProperties(
+updatePayload,
+prevProps,
+validAttributes)
+{
+return diffProperties(updatePayload,prevProps,{},validAttributes);}
+
+
+var ReactNativeAttributePayload={
+
+create:function(
+props,
+validAttributes)
+{
+return addProperties(
+null,
+props,
+validAttributes);},
+
+
+
+diff:function(
+prevProps,
+nextProps,
+validAttributes)
+{
+return diffProperties(
+null,
+prevProps,
+nextProps,
+validAttributes);}};
+
+
+
+
+
+module.exports = ReactNativeAttributePayload;
+});
+__d('deepDiffer',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var deepDiffer=function(one,two){
+if(one === two){
+
+return false;}
+
+if(typeof one === 'function' && typeof two === 'function'){
+
+return false;}
+
+if(typeof one !== 'object' || one === null){
+
+return one !== two;}
+
+if(typeof two !== 'object' || two === null){
+
+
+return true;}
+
+if(one.constructor !== two.constructor){
+return true;}
+
+if(Array.isArray(one)){
+
+var len=one.length;
+if(two.length !== len){
+return true;}
+
+for(var ii=0;ii < len;ii++) {
+if(deepDiffer(one[ii],two[ii])){
+return true;}}}else 
+
+
+{
+for(var key in one) {
+if(deepDiffer(one[key],two[key])){
+return true;}}
+
+
+for(var twoKey in two) {
+
+
+if(one[twoKey] === undefined && two[twoKey] !== undefined){
+return true;}}}
+
+
+
+return false;};
+
+
+module.exports = deepDiffer;
+});
+__d('styleDiffer',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+var deepDiffer=require('deepDiffer');
+
+function styleDiffer(a,b){
+return !styleEqual(a,b);}
+
+
+function styleEqual(a,b){
+if(!a){
+return !b;}
+
+if(!b){
+return !a;}
+
+if(typeof a !== typeof b){
+return false;}
+
+if(typeof a === 'number'){
+return a === b;}
+
+
+if(Array.isArray(a)){
+if(!Array.isArray(b) || a.length !== b.length){
+return false;}
+
+for(var i=0;i < a.length;++i) {
+if(!styleEqual(a[i],b[i])){
+return false;}}
+
+
+return true;}
+
+
+for(var key in a) {
+if(deepDiffer(a[key],b[key])){
+return false;}}
+
+
+
+for(var key in b) {
+if(!a.hasOwnProperty(key)){
+return false;}}
+
+
+
+return true;}
+
+
+module.exports = styleDiffer;
+});
+__d('deepFreezeAndThrowOnMutationInDev',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function deepFreezeAndThrowOnMutationInDev(object){
+if(__DEV__){
+if(typeof object !== 'object' || 
+object === null || 
+Object.isFrozen(object) || 
+Object.isSealed(object)){
+return;}
+
+
+for(var key in object) {
+if(object.hasOwnProperty(key)){
+object.__defineGetter__(key,identity.bind(null,object[key]));
+object.__defineSetter__(key,throwOnImmutableMutation.bind(null,key));
+deepFreezeAndThrowOnMutationInDev(object[key]);}}
+
+
+Object.freeze(object);
+Object.seal(object);}}
+
+
+
+function throwOnImmutableMutation(key,value){
+throw Error(
+'You attempted to set the key `' + key + '` with the value `' + 
+JSON.stringify(value) + '` on an object that is meant to be immutable ' + 
+'and has been frozen.');}
+
+
+
+function identity(value){
+return value;}
+
+
+module.exports = deepFreezeAndThrowOnMutationInDev;
 });
 __d('ReactUpdateQueue',function(global, require, module, exports) {  'use strict';
 
@@ -15342,6 +16352,7 @@ __d('ReactNativeReconcileTransaction',function(global, require, module, exports)
 var CallbackQueue=require('CallbackQueue');
 var PooledClass=require('PooledClass');
 var Transaction=require('Transaction');
+var ReactNativeViewPool=require('ReactNativeViewPool');
 
 
 
@@ -15363,12 +16374,18 @@ this.reactMountReady.notifyAll();}};
 
 
 
+var RN_VIEW_POOL_WRAPPER={
+close:function(){
+ReactNativeViewPool.onReconcileTransactionClose();}};
 
 
 
 
 
-var TRANSACTION_WRAPPERS=[ON_DOM_READY_QUEUEING];
+
+
+
+var TRANSACTION_WRAPPERS=[ON_DOM_READY_QUEUEING,RN_VIEW_POOL_WRAPPER];
 
 
 
@@ -17784,6 +18801,7 @@ var ReactNativeAttributePayload=require('ReactNativeAttributePayload');
 var ReactNativeEventEmitter=require('ReactNativeEventEmitter');
 var ReactNativeStyleAttributes=require('ReactNativeStyleAttributes');
 var ReactNativeTagHandles=require('ReactNativeTagHandles');
+var ReactNativeViewPool=require('ReactNativeViewPool');
 var ReactMultiChild=require('ReactMultiChild');
 var RCTUIManager=require('NativeModules').UIManager;
 
@@ -17856,6 +18874,7 @@ this._currentElement = element;},
 unmountComponent:function(){
 deleteAllListeners(this._rootNodeID);
 this.unmountChildren();
+ReactNativeViewPool.release(this);
 this._rootNodeID = null;},
 
 
@@ -17972,24 +18991,7 @@ deleteListener(this._rootNodeID,key);}}}},
 mountComponent:function(rootID,transaction,context){
 this._rootNodeID = rootID;
 
-var tag=ReactNativeTagHandles.allocateTag();
-
-if(__DEV__){
-deepFreezeAndThrowOnMutationInDev(this._currentElement.props);}
-
-
-var updatePayload=ReactNativeAttributePayload.create(
-this._currentElement.props,
-this.viewConfig.validAttributes);
-
-
-var nativeTopRootID=ReactNativeTagHandles.getNativeTopRootIDFromNodeID(rootID);
-RCTUIManager.createView(
-tag,
-this.viewConfig.uiViewClassName,
-nativeTopRootID?ReactNativeTagHandles.rootNodeIDToTag[nativeTopRootID]:null,
-updatePayload);
-
+var tag=ReactNativeViewPool.acquire(this);
 
 this._registerListenersUponCreation(this._currentElement.props);
 this.initializeChildren(
@@ -18209,442 +19211,6 @@ return callback.apply(context,arguments);};};
 
 
 module.exports = NativeMethodsMixin;
-});
-__d('ReactNativeAttributePayload',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-var Platform=require('Platform');
-
-var deepDiffer=require('deepDiffer');
-var styleDiffer=require('styleDiffer');
-var flattenStyle=require('flattenStyle');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function translateKey(propKey){
-if(propKey === 'transform'){
-
-
-
-
-if(Platform.OS === 'android'){
-return 'decomposedMatrix';}else 
-{
-return 'transformMatrix';}}
-
-
-return propKey;}
-
-
-function defaultDiffer(prevProp,nextProp){
-if(typeof nextProp !== 'object' || nextProp === null){
-
-return true;}else 
-{
-
-return deepDiffer(prevProp,nextProp);}}
-
-
-
-function diffNestedProperty(
-updatePayload,
-prevProp,
-nextProp,
-validAttributes)
-{
-
-
-
-
-
-if(!styleDiffer(prevProp,nextProp)){
-return updatePayload;}
-
-
-
-
-var previousFlattenedStyle=flattenStyle(prevProp);
-var nextFlattenedStyle=flattenStyle(nextProp);
-
-if(!previousFlattenedStyle || !nextFlattenedStyle){
-if(nextFlattenedStyle){
-return addProperties(
-updatePayload,
-nextFlattenedStyle,
-validAttributes);}
-
-
-if(previousFlattenedStyle){
-return clearProperties(
-updatePayload,
-previousFlattenedStyle,
-validAttributes);}
-
-
-return updatePayload;}
-
-
-
-return diffProperties(
-updatePayload,
-previousFlattenedStyle,
-nextFlattenedStyle,
-validAttributes);}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function clearNestedProperty(
-updatePayload,
-prevProp,
-validAttributes)
-{
-
-return diffNestedProperty(updatePayload,prevProp,{},validAttributes);}
-
-
-
-
-
-
-
-
-function diffProperties(
-updatePayload,
-prevProps,
-nextProps,
-validAttributes)
-{
-var attributeConfig;
-var nextProp;
-var prevProp;
-
-for(var propKey in nextProps) {
-attributeConfig = validAttributes[propKey];
-if(!attributeConfig){
-continue;}
-
-
-var altKey=translateKey(propKey);
-if(!validAttributes[altKey]){
-
-altKey = propKey;}
-
-
-if(updatePayload && updatePayload[altKey] !== undefined){
-
-
-continue;}
-
-prevProp = prevProps[propKey];
-nextProp = nextProps[propKey];
-
-
-
-if(typeof nextProp === 'function'){
-nextProp = true;
-
-
-if(typeof prevProp === 'function'){
-prevProp = true;}}
-
-
-
-if(prevProp === nextProp){
-continue;}
-
-
-
-if(typeof attributeConfig !== 'object'){
-
-if(defaultDiffer(prevProp,nextProp)){
-
-(updatePayload || (updatePayload = {}))[altKey] = nextProp;}}else 
-
-if(typeof attributeConfig.diff === 'function' || 
-typeof attributeConfig.process === 'function'){
-
-var shouldUpdate=prevProp === undefined || (
-typeof attributeConfig.diff === 'function'?
-attributeConfig.diff(prevProp,nextProp):
-defaultDiffer(prevProp,nextProp));
-
-if(shouldUpdate){
-var nextValue=typeof attributeConfig.process === 'function'?
-attributeConfig.process(nextProp):
-nextProp;
-(updatePayload || (updatePayload = {}))[altKey] = nextValue;}}else 
-
-{
-
-updatePayload = diffNestedProperty(
-updatePayload,
-prevProp,
-nextProp,
-attributeConfig);}}
-
-
-
-
-
-
-
-for(var propKey in prevProps) {
-if(nextProps[propKey] !== undefined){
-continue;}
-
-attributeConfig = validAttributes[propKey];
-if(!attributeConfig){
-continue;}
-
-
-prevProp = prevProps[propKey];
-if(prevProp === undefined){
-continue;}
-
-
-if(typeof attributeConfig !== 'object' || 
-typeof attributeConfig.diff === 'function' || 
-typeof attributeConfig.process === 'function'){
-
-
-
-(updatePayload || (updatePayload = {}))[translateKey(propKey)] = null;}else 
-{
-
-
-
-updatePayload = clearNestedProperty(
-updatePayload,
-prevProp,
-attributeConfig);}}
-
-
-
-return updatePayload;}
-
-
-
-
-
-function addProperties(
-updatePayload,
-props,
-validAttributes)
-{
-return diffProperties(updatePayload,{},props,validAttributes);}
-
-
-
-
-
-
-function clearProperties(
-updatePayload,
-prevProps,
-validAttributes)
-{
-return diffProperties(updatePayload,prevProps,{},validAttributes);}
-
-
-var ReactNativeAttributePayload={
-
-create:function(
-props,
-validAttributes)
-{
-return addProperties(
-null,
-props,
-validAttributes);},
-
-
-
-diff:function(
-prevProps,
-nextProps,
-validAttributes)
-{
-return diffProperties(
-null,
-prevProps,
-nextProps,
-validAttributes);}};
-
-
-
-
-
-module.exports = ReactNativeAttributePayload;
-});
-__d('deepDiffer',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var deepDiffer=function(one,two){
-if(one === two){
-
-return false;}
-
-if(typeof one === 'function' && typeof two === 'function'){
-
-return false;}
-
-if(typeof one !== 'object' || one === null){
-
-return one !== two;}
-
-if(typeof two !== 'object' || two === null){
-
-
-return true;}
-
-if(one.constructor !== two.constructor){
-return true;}
-
-if(Array.isArray(one)){
-
-var len=one.length;
-if(two.length !== len){
-return true;}
-
-for(var ii=0;ii < len;ii++) {
-if(deepDiffer(one[ii],two[ii])){
-return true;}}}else 
-
-
-{
-for(var key in one) {
-if(deepDiffer(one[key],two[key])){
-return true;}}
-
-
-for(var twoKey in two) {
-
-
-if(one[twoKey] === undefined && two[twoKey] !== undefined){
-return true;}}}
-
-
-
-return false;};
-
-
-module.exports = deepDiffer;
-});
-__d('styleDiffer',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-var deepDiffer=require('deepDiffer');
-
-function styleDiffer(a,b){
-return !styleEqual(a,b);}
-
-
-function styleEqual(a,b){
-if(!a){
-return !b;}
-
-if(!b){
-return !a;}
-
-if(typeof a !== typeof b){
-return false;}
-
-if(typeof a === 'number'){
-return a === b;}
-
-
-if(Array.isArray(a)){
-if(!Array.isArray(b) || a.length !== b.length){
-return false;}
-
-for(var i=0;i < a.length;++i) {
-if(!styleEqual(a[i],b[i])){
-return false;}}
-
-
-return true;}
-
-
-for(var key in a) {
-if(deepDiffer(a[key],b[key])){
-return false;}}
-
-
-
-for(var key in b) {
-if(!a.hasOwnProperty(key)){
-return false;}}
-
-
-
-return true;}
-
-
-module.exports = styleDiffer;
 });
 __d('TextInputState',function(global, require, module, exports) {  'use strict';
 
@@ -19144,7 +19710,11 @@ var ReactPropTypes=require('ReactPropTypes');
 
 var LayoutPropTypes={
 width:ReactPropTypes.number,
+maxWidth:ReactPropTypes.number,
+minWidth:ReactPropTypes.number,
 height:ReactPropTypes.number,
+maxHeight:ReactPropTypes.number,
+minHeight:ReactPropTypes.number,
 top:ReactPropTypes.number,
 left:ReactPropTypes.number,
 right:ReactPropTypes.number,
@@ -22232,72 +22802,6 @@ return result;}
 
 module.exports = flattenChildren;
 });
-__d('deepFreezeAndThrowOnMutationInDev',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function deepFreezeAndThrowOnMutationInDev(object){
-if(__DEV__){
-if(typeof object !== 'object' || 
-object === null || 
-Object.isFrozen(object) || 
-Object.isSealed(object)){
-return;}
-
-
-for(var key in object) {
-if(object.hasOwnProperty(key)){
-object.__defineGetter__(key,identity.bind(null,object[key]));
-object.__defineSetter__(key,throwOnImmutableMutation.bind(null,key));
-deepFreezeAndThrowOnMutationInDev(object[key]);}}
-
-
-Object.freeze(object);
-Object.seal(object);}}
-
-
-
-function throwOnImmutableMutation(key,value){
-throw Error(
-'You attempted to set the key `' + key + '` with the value `' + 
-JSON.stringify(value) + '` on an object that is meant to be immutable ' + 
-'and has been frozen.');}
-
-
-
-function identity(value){
-return value;}
-
-
-module.exports = deepFreezeAndThrowOnMutationInDev;
-});
 __d('UIManagerStatTracker',function(global, require, module, exports) {  'use strict';
 
 
@@ -24304,7 +24808,7 @@ var ReactNativeViewAttributes=require('ReactNativeViewAttributes');
 var StyleSheetPropType=require('StyleSheetPropType');
 var ViewStylePropTypes=require('ViewStylePropTypes');
 
-var createReactNativeComponentClass=require('createReactNativeComponentClass');
+var requireNativeComponent=require('requireNativeComponent');
 
 var stylePropType=StyleSheetPropType(ViewStylePropTypes);
 
@@ -24600,11 +25104,12 @@ return React.createElement(RCTView,this.props);}});
 
 
 
-var RCTView=createReactNativeComponentClass({
-validAttributes:ReactNativeViewAttributes.RCTView,
-uiViewClassName:'RCTView'});
+var RCTView=requireNativeComponent('RCTView',View,{
+nativeOnly:{
+nativeBackgroundAndroid:true}});
 
-RCTView.propTypes = View.propTypes;
+
+
 if(__DEV__){
 var viewConfig=RCTUIManager.viewConfigs && RCTUIManager.viewConfigs.RCTView || {};
 for(var prop in viewConfig.nativeProps) {
@@ -24785,6 +25290,443 @@ return chainedCheckType;}
 
 
 module.exports = createStrictShapeTypeChecker;
+});
+__d('requireNativeComponent',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+var RCTUIManager=require('NativeModules').UIManager;
+var ReactNativeStyleAttributes=require('ReactNativeStyleAttributes');
+var UnimplementedView=require('UnimplementedView');
+
+var createReactNativeComponentClass=require('createReactNativeComponentClass');
+var insetsDiffer=require('insetsDiffer');
+var pointsDiffer=require('pointsDiffer');
+var matricesDiffer=require('matricesDiffer');
+var processColor=require('processColor');
+var sizesDiffer=require('sizesDiffer');
+var verifyPropTypes=require('verifyPropTypes');
+var warning=require('warning');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function requireNativeComponent(
+viewName,
+componentInterface,
+extraConfig)
+{
+var viewConfig=RCTUIManager[viewName];
+if(!viewConfig || !viewConfig.NativeProps){
+warning(false,'Native component for "%s" does not exist',viewName);
+return UnimplementedView;}
+
+var nativeProps=babelHelpers.extends({},
+RCTUIManager.RCTView.NativeProps,
+viewConfig.NativeProps);
+
+viewConfig.uiViewClassName = viewName;
+viewConfig.validAttributes = {};
+viewConfig.propTypes = componentInterface && componentInterface.propTypes;
+for(var key in nativeProps) {
+var useAttribute=false;
+var attribute={};
+
+var differ=TypeToDifferMap[nativeProps[key]];
+if(differ){
+attribute.diff = differ;
+useAttribute = true;}
+
+
+var processor=TypeToProcessorMap[nativeProps[key]];
+if(processor){
+attribute.process = processor;
+useAttribute = true;}
+
+
+viewConfig.validAttributes[key] = useAttribute?attribute:true;}
+
+
+
+
+
+
+
+viewConfig.validAttributes.style = ReactNativeStyleAttributes;
+
+if(__DEV__){
+componentInterface && verifyPropTypes(
+componentInterface,
+viewConfig,
+extraConfig && extraConfig.nativeOnly);}
+
+
+return createReactNativeComponentClass(viewConfig);}
+
+
+var TypeToDifferMap={
+
+CATransform3D:matricesDiffer,
+CGPoint:pointsDiffer,
+CGSize:sizesDiffer,
+UIEdgeInsets:insetsDiffer};
+
+
+
+
+var TypeToProcessorMap={
+
+CGColor:processColor,
+CGColorArray:processColor,
+UIColor:processColor,
+UIColorArray:processColor,
+
+Color:processColor};
+
+
+module.exports = requireNativeComponent;
+});
+__d('verifyPropTypes',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+var ReactNativeStyleAttributes=require('ReactNativeStyleAttributes');
+
+
+
+
+
+
+
+function verifyPropTypes(
+componentInterface,
+viewConfig,
+nativePropsToIgnore)
+{
+if(!viewConfig){
+return;}
+
+var componentName=componentInterface.name || 
+componentInterface.displayName || 
+'unknown';
+if(!componentInterface.propTypes){
+throw new Error(
+'`' + componentName + '` has no propTypes defined`');}
+
+
+
+var nativeProps=viewConfig.NativeProps;
+for(var prop in nativeProps) {
+if(!componentInterface.propTypes[prop] && 
+!ReactNativeStyleAttributes[prop] && (
+!nativePropsToIgnore || !nativePropsToIgnore[prop])){
+throw new Error(
+'`' + componentName + '` has no propType for native prop `' + 
+viewConfig.uiViewClassName + '.' + prop + '` of native type `' + 
+nativeProps[prop] + '`');}}}
+
+
+
+
+
+module.exports = verifyPropTypes;
+});
+__d('UnimplementedView',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+var React=require('React');
+var StyleSheet=require('StyleSheet');
+var View=require('View');
+
+var UnimplementedView=React.createClass({displayName:'UnimplementedView',
+setNativeProps:function(){},
+
+
+
+
+render:function(){
+return (
+React.createElement(View,{style:[styles.unimplementedView,this.props.style]},
+this.props.children));}});
+
+
+
+
+
+var styles=StyleSheet.create({
+unimplementedView:{
+borderWidth:1,
+borderColor:'red',
+alignSelf:'flex-start'}});
+
+
+
+module.exports = UnimplementedView;
+});
+__d('StyleSheet',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+var StyleSheetRegistry=require('StyleSheetRegistry');
+var StyleSheetValidation=require('StyleSheetValidation');
+var flattenStyle=require('flattenStyle');var 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+StyleSheet=(function(){function StyleSheet(){babelHelpers.classCallCheck(this,StyleSheet);}babelHelpers.createClass(StyleSheet,null,[{key:'create',value:function create(
+
+
+obj){
+var result={};
+for(var key in obj) {
+StyleSheetValidation.validateStyle(key,obj);
+result[key] = StyleSheetRegistry.registerStyle(obj[key]);}
+
+return result;}}]);return StyleSheet;})();
+
+
+
+
+StyleSheet.flatten = flattenStyle;
+
+module.exports = StyleSheet;
+});
+__d('StyleSheetValidation',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+var ImageStylePropTypes=require('ImageStylePropTypes');
+var ReactPropTypeLocations=require('ReactPropTypeLocations');
+var TextStylePropTypes=require('TextStylePropTypes');
+var ViewStylePropTypes=require('ViewStylePropTypes');
+
+var invariant=require('invariant');var 
+
+StyleSheetValidation=(function(){function StyleSheetValidation(){babelHelpers.classCallCheck(this,StyleSheetValidation);}babelHelpers.createClass(StyleSheetValidation,null,[{key:'validateStyleProp',value:function validateStyleProp(
+prop,style,caller){
+if(!__DEV__){
+return;}
+
+if(allStylePropTypes[prop] === undefined){
+var message1='"' + prop + '" is not a valid style property.';
+var message2='\nValid style props: ' + 
+JSON.stringify(Object.keys(allStylePropTypes).sort(),null,'  ');
+styleError(message1,style,caller,message2);}
+
+var error=allStylePropTypes[prop](
+style,
+prop,
+caller,
+ReactPropTypeLocations.prop);
+
+if(error){
+styleError(error.message,style,caller);}}},{key:'validateStyle',value:function validateStyle(
+
+
+
+name,styles){
+if(!__DEV__){
+return;}
+
+for(var prop in styles[name]) {
+StyleSheetValidation.validateStyleProp(prop,styles[name],'StyleSheet ' + name);}}},{key:'addValidStylePropTypes',value:function addValidStylePropTypes(
+
+
+
+stylePropTypes){
+for(var key in stylePropTypes) {
+allStylePropTypes[key] = stylePropTypes[key];}}}]);return StyleSheetValidation;})();
+
+
+
+
+var styleError=function(message1,style,caller,message2){
+invariant(
+false,
+message1 + '\n' + (caller || '<<unknown>>') + ': ' + 
+JSON.stringify(style,null,'  ') + (message2 || ''));};
+
+
+
+var allStylePropTypes={};
+
+StyleSheetValidation.addValidStylePropTypes(ImageStylePropTypes);
+StyleSheetValidation.addValidStylePropTypes(TextStylePropTypes);
+StyleSheetValidation.addValidStylePropTypes(ViewStylePropTypes);
+
+module.exports = StyleSheetValidation;
+});
+__d('insetsDiffer',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var dummyInsets={
+top:undefined,
+left:undefined,
+right:undefined,
+bottom:undefined};
+
+
+var insetsDiffer=function(
+one,
+two)
+{
+one = one || dummyInsets;
+two = two || dummyInsets;
+return one !== two && (
+one.top !== two.top || 
+one.left !== two.left || 
+one.right !== two.right || 
+one.bottom !== two.bottom);};
+
+
+
+module.exports = insetsDiffer;
+});
+__d('pointsDiffer',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var dummyPoint={x:undefined,y:undefined};
+
+var pointsDiffer=function(one,two){
+one = one || dummyPoint;
+two = two || dummyPoint;
+return one !== two && (
+one.x !== two.x || 
+one.y !== two.y);};
+
+
+
+module.exports = pointsDiffer;
 });
 __d('ReactNativeART',function(global, require, module, exports) {  'use strict';
 
@@ -26163,159 +27105,6 @@ margin:20}});
 
 module.exports = DummyDatePickerIOS;
 });
-__d('StyleSheet',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-var StyleSheetRegistry=require('StyleSheetRegistry');
-var StyleSheetValidation=require('StyleSheetValidation');
-var flattenStyle=require('flattenStyle');var 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-StyleSheet=(function(){function StyleSheet(){babelHelpers.classCallCheck(this,StyleSheet);}babelHelpers.createClass(StyleSheet,null,[{key:'create',value:function create(
-
-
-obj){
-var result={};
-for(var key in obj) {
-StyleSheetValidation.validateStyle(key,obj);
-result[key] = StyleSheetRegistry.registerStyle(obj[key]);}
-
-return result;}}]);return StyleSheet;})();
-
-
-
-
-StyleSheet.flatten = flattenStyle;
-
-module.exports = StyleSheet;
-});
-__d('StyleSheetValidation',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-var ImageStylePropTypes=require('ImageStylePropTypes');
-var ReactPropTypeLocations=require('ReactPropTypeLocations');
-var TextStylePropTypes=require('TextStylePropTypes');
-var ViewStylePropTypes=require('ViewStylePropTypes');
-
-var invariant=require('invariant');var 
-
-StyleSheetValidation=(function(){function StyleSheetValidation(){babelHelpers.classCallCheck(this,StyleSheetValidation);}babelHelpers.createClass(StyleSheetValidation,null,[{key:'validateStyleProp',value:function validateStyleProp(
-prop,style,caller){
-if(!__DEV__){
-return;}
-
-if(allStylePropTypes[prop] === undefined){
-var message1='"' + prop + '" is not a valid style property.';
-var message2='\nValid style props: ' + 
-JSON.stringify(Object.keys(allStylePropTypes).sort(),null,'  ');
-styleError(message1,style,caller,message2);}
-
-var error=allStylePropTypes[prop](
-style,
-prop,
-caller,
-ReactPropTypeLocations.prop);
-
-if(error){
-styleError(error.message,style,caller);}}},{key:'validateStyle',value:function validateStyle(
-
-
-
-name,styles){
-if(!__DEV__){
-return;}
-
-for(var prop in styles[name]) {
-StyleSheetValidation.validateStyleProp(prop,styles[name],'StyleSheet ' + name);}}},{key:'addValidStylePropTypes',value:function addValidStylePropTypes(
-
-
-
-stylePropTypes){
-for(var key in stylePropTypes) {
-allStylePropTypes[key] = stylePropTypes[key];}}}]);return StyleSheetValidation;})();
-
-
-
-
-var styleError=function(message1,style,caller,message2){
-invariant(
-false,
-message1 + '\n' + (caller || '<<unknown>>') + ': ' + 
-JSON.stringify(style,null,'  ') + (message2 || ''));};
-
-
-
-var allStylePropTypes={};
-
-StyleSheetValidation.addValidStylePropTypes(ImageStylePropTypes);
-StyleSheetValidation.addValidStylePropTypes(TextStylePropTypes);
-StyleSheetValidation.addValidStylePropTypes(ViewStylePropTypes);
-
-module.exports = StyleSheetValidation;
-});
 __d('Text',function(global, require, module, exports) {  'use strict';
 
 
@@ -27448,9 +28237,9 @@ var RCTUIManager=require('NativeModules').UIManager;
 var StyleSheet=require('StyleSheet');
 var View=require('View');
 
-var createReactNativeComponentClass=require('createReactNativeComponentClass');
 var dismissKeyboard=require('dismissKeyboard');
 var merge=require('merge');
+var requireNativeComponent=require('requireNativeComponent');
 
 var RK_DRAWER_REF='drawerlayout';
 var INNERVIEW_REF='innerView';
@@ -27502,7 +28291,8 @@ statics:{
 positions:DrawerConsts.DrawerPosition},
 
 
-propTypes:{
+propTypes:babelHelpers.extends({},
+View.propTypes,{
 
 
 
@@ -27547,7 +28337,7 @@ onDrawerClose:ReactPropTypes.func,
 
 
 
-renderNavigationView:ReactPropTypes.func.isRequired},
+renderNavigationView:ReactPropTypes.func.isRequired}),
 
 
 mixins:[NativeMethodsMixin],
@@ -27649,10 +28439,7 @@ bottom:0}});
 
 
 
-var AndroidDrawerLayout=createReactNativeComponentClass({
-validAttributes:merge(ReactNativeViewAttributes.UIView,DrawerLayoutValidAttributes),
-uiViewClassName:'AndroidDrawerLayout'});
-
+var AndroidDrawerLayout=requireNativeComponent('AndroidDrawerLayout',DrawerLayoutAndroid);
 
 module.exports = DrawerLayoutAndroid;
 });
@@ -27697,10 +28484,10 @@ var StyleSheet=require('StyleSheet');
 var StyleSheetPropType=require('StyleSheetPropType');
 var View=require('View');
 
-var createReactNativeComponentClass=require('createReactNativeComponentClass');
 var flattenStyle=require('flattenStyle');
 var invariant=require('invariant');
 var merge=require('merge');
+var requireNativeComponent=require('requireNativeComponent');
 var resolveAssetSource=require('resolveAssetSource');
 
 
@@ -27734,7 +28521,8 @@ fadeDuration:true});
 
 
 var Image=React.createClass({displayName:'Image',
-propTypes:{
+propTypes:babelHelpers.extends({},
+View.propTypes,{
 
 
 
@@ -27753,7 +28541,7 @@ style:StyleSheetPropType(ImageStylePropTypes),
 
 
 
-testID:PropTypes.string},
+testID:PropTypes.string}),
 
 
 statics:{
@@ -27854,14 +28642,16 @@ position:'absolute'}});
 
 
 
-var RKImage=createReactNativeComponentClass({
-validAttributes:ImageViewAttributes,
-uiViewClassName:'RCTImageView'});
+var cfg={
+nativeOnly:{
+src:true,
+defaultImageSrc:true,
+imageTag:true,
+progressHandlerRegistered:true}};
 
-var RCTTextInlineImage=createReactNativeComponentClass({
-validAttributes:ImageViewAttributes,
-uiViewClassName:'RCTTextInlineImage'});
 
+var RKImage=requireNativeComponent('RCTImageView',Image,cfg);
+var RCTTextInlineImage=requireNativeComponent('RCTTextInlineImage',Image,cfg);
 
 module.exports = Image;
 });
@@ -28628,7 +29418,9 @@ onKeyboardDidHide:undefined});
 
 
 return React.cloneElement(renderScrollComponent(props),{
-ref:SCROLLVIEW_REF},
+ref:SCROLLVIEW_REF,
+onContentSizeChange:this._onContentSizeChange,
+onLayout:this._onLayout},
 header,bodyComponents,footer);},
 
 
@@ -28641,17 +29433,6 @@ var scrollComponent=this.getScrollResponder();
 if(!scrollComponent || !scrollComponent.getInnerViewNode){
 return;}
 
-RCTUIManager.measureLayout(
-scrollComponent.getInnerViewNode(),
-React.findNodeHandle(scrollComponent),
-logError,
-this._setScrollContentLength);
-
-RCTUIManager.measureLayoutRelativeToParent(
-React.findNodeHandle(scrollComponent),
-logError,
-this._setScrollVisibleLength);
-
 
 
 
@@ -28662,9 +29443,19 @@ this._updateChildFrames);},
 
 
 
-_setScrollContentLength:function(left,top,width,height){
+_onContentSizeChange:function(width,height){
 this.scrollProperties.contentLength = !this.props.horizontal?
-height:width;},
+height:width;
+this._updateVisibleRows();
+this._renderMoreRowsIfNeeded();},
+
+
+_onLayout:function(event){var _event$nativeEvent$la=
+event.nativeEvent.layout;var width=_event$nativeEvent$la.width;var height=_event$nativeEvent$la.height;
+this.scrollProperties.visibleLength = !this.props.horizontal?
+height:width;
+this._updateVisibleRows();
+this._renderMoreRowsIfNeeded();},
 
 
 _setScrollVisibleLength:function(left,top,width,height){
@@ -29287,6 +30078,7 @@ var EdgeInsetsPropType=require('EdgeInsetsPropType');
 var Platform=require('Platform');
 var PointPropType=require('PointPropType');
 var RCTScrollView=require('NativeModules').UIManager.RCTScrollView;
+var RCTScrollViewManager=require('NativeModules').ScrollViewManager;
 var React=require('React');
 var ReactNativeViewAttributes=require('ReactNativeViewAttributes');
 var RCTUIManager=require('NativeModules').UIManager;
@@ -29296,7 +30088,6 @@ var StyleSheetPropType=require('StyleSheetPropType');
 var View=require('View');
 var ViewStylePropTypes=require('ViewStylePropTypes');
 
-var createReactNativeComponentClass=require('createReactNativeComponentClass');
 var deepDiffer=require('deepDiffer');
 var dismissKeyboard=require('dismissKeyboard');
 var flattenStyle=require('flattenStyle');
@@ -29326,7 +30117,8 @@ var INNERVIEW='InnerScrollView';
 
 
 var ScrollView=React.createClass({displayName:'ScrollView',
-propTypes:{
+propTypes:babelHelpers.extends({},
+View.propTypes,{
 
 
 
@@ -29469,6 +30261,12 @@ onScrollAnimationEnd:PropTypes.func,
 
 
 
+onContentSizeChange:PropTypes.func,
+
+
+
+
+
 
 pagingEnabled:PropTypes.bool,
 
@@ -29550,7 +30348,22 @@ removeClippedSubviews:PropTypes.bool,
 
 
 
-zoomScale:PropTypes.number},
+zoomScale:PropTypes.number,
+
+
+
+
+
+
+
+
+
+
+
+
+
+onRefreshStart:PropTypes.func}),
+
 
 
 mixins:[ScrollResponder.Mixin],
@@ -29561,6 +30374,12 @@ return this.scrollResponderMixinGetInitialState();},
 
 setNativeProps:function(props){
 this.refs[SCROLLVIEW].setNativeProps(props);},
+
+
+endRefreshing:function(){
+RCTScrollViewManager.endRefreshing(
+React.findNodeHandle(this));},
+
 
 
 
@@ -29610,6 +30429,11 @@ dismissKeyboard();}}
 this.scrollResponderHandleScroll(e);},
 
 
+_handleContentOnLayout:function(e){var _e$nativeEvent$layout=
+e.nativeEvent.layout;var width=_e$nativeEvent$layout.width;var height=_e$nativeEvent$layout.height;
+this.props.onContentSizeChange && this.props.onContentSizeChange(width,height);},
+
+
 render:function(){
 var contentContainerStyle=[
 this.props.horizontal && styles.contentContainerHorizontal,
@@ -29626,12 +30450,20 @@ childLayoutProps.length === 0,
 
 
 
+var contentSizeChangeProps={};
+if(this.props.onContentSizeChange){
+contentSizeChangeProps = {
+onLayout:this._handleContentOnLayout};}
+
+
+
 var contentContainer=
-React.createElement(View,{
+React.createElement(View,babelHelpers.extends({},
+contentSizeChangeProps,{
 ref:INNERVIEW,
 style:contentContainerStyle,
 removeClippedSubviews:this.props.removeClippedSubviews,
-collapsable:false},
+collapsable:false}),
 this.props.children);
 
 
@@ -29667,6 +30499,13 @@ onResponderTerminate:this.scrollResponderHandleTerminate,
 onResponderRelease:this.scrollResponderHandleResponderRelease,
 onResponderReject:this.scrollResponderHandleResponderReject});
 
+
+var onRefreshStart=this.props.onRefreshStart;
+
+
+props.onRefreshStart = onRefreshStart?
+(function(){onRefreshStart && onRefreshStart(this.endRefreshing);}).bind(this):
+null;
 
 var ScrollViewClass;
 if(Platform.OS === 'ios'){
@@ -29731,13 +30570,10 @@ zoomScale:true});
 
 
 if(Platform.OS === 'android'){
-var AndroidScrollView=createReactNativeComponentClass({
-validAttributes:validAttributes,
-uiViewClassName:'RCTScrollView'});
-
-var AndroidHorizontalScrollView=createReactNativeComponentClass({
-validAttributes:validAttributes,
-uiViewClassName:'AndroidHorizontalScrollView'});}else 
+var AndroidScrollView=requireNativeComponent('RCTScrollView',ScrollView);
+var AndroidHorizontalScrollView=requireNativeComponent(
+'AndroidHorizontalScrollView',
+ScrollView);}else 
 
 if(Platform.OS === 'ios'){
 var RCTScrollView=requireNativeComponent('RCTScrollView',ScrollView);}
@@ -30387,292 +31223,6 @@ eventEmitter.addListener(eventType,listener,context));}};
 
 module.exports = Subscribable;
 });
-__d('insetsDiffer',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var dummyInsets={
-top:undefined,
-left:undefined,
-right:undefined,
-bottom:undefined};
-
-
-var insetsDiffer=function(
-one,
-two)
-{
-one = one || dummyInsets;
-two = two || dummyInsets;
-return one !== two && (
-one.top !== two.top || 
-one.left !== two.left || 
-one.right !== two.right || 
-one.bottom !== two.bottom);};
-
-
-
-module.exports = insetsDiffer;
-});
-__d('pointsDiffer',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var dummyPoint={x:undefined,y:undefined};
-
-var pointsDiffer=function(one,two){
-one = one || dummyPoint;
-two = two || dummyPoint;
-return one !== two && (
-one.x !== two.x || 
-one.y !== two.y);};
-
-
-
-module.exports = pointsDiffer;
-});
-__d('requireNativeComponent',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-var RCTUIManager=require('NativeModules').UIManager;
-var ReactNativeStyleAttributes=require('ReactNativeStyleAttributes');
-var UnimplementedView=require('UnimplementedView');
-
-var createReactNativeComponentClass=require('createReactNativeComponentClass');
-var insetsDiffer=require('insetsDiffer');
-var pointsDiffer=require('pointsDiffer');
-var matricesDiffer=require('matricesDiffer');
-var processColor=require('processColor');
-var sizesDiffer=require('sizesDiffer');
-var verifyPropTypes=require('verifyPropTypes');
-var warning=require('warning');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function requireNativeComponent(
-viewName,
-componentInterface,
-extraConfig)
-{
-var viewConfig=RCTUIManager[viewName];
-if(!viewConfig || !viewConfig.NativeProps){
-warning(false,'Native component for "%s" does not exist',viewName);
-return UnimplementedView;}
-
-var nativeProps=babelHelpers.extends({},
-RCTUIManager.RCTView.NativeProps,
-viewConfig.NativeProps);
-
-viewConfig.uiViewClassName = viewName;
-viewConfig.validAttributes = {};
-viewConfig.propTypes = componentInterface && componentInterface.propTypes;
-for(var key in nativeProps) {
-var useAttribute=false;
-var attribute={};
-
-var differ=TypeToDifferMap[nativeProps[key]];
-if(differ){
-attribute.diff = differ;
-useAttribute = true;}
-
-
-var processor=TypeToProcessorMap[nativeProps[key]];
-if(processor){
-attribute.process = processor;
-useAttribute = true;}
-
-
-viewConfig.validAttributes[key] = useAttribute?attribute:true;}
-
-
-
-
-
-
-
-viewConfig.validAttributes.style = ReactNativeStyleAttributes;
-
-if(__DEV__){
-componentInterface && verifyPropTypes(
-componentInterface,
-viewConfig,
-extraConfig && extraConfig.nativeOnly);}
-
-
-return createReactNativeComponentClass(viewConfig);}
-
-
-var TypeToDifferMap={
-
-CATransform3D:matricesDiffer,
-CGPoint:pointsDiffer,
-CGSize:sizesDiffer,
-UIEdgeInsets:insetsDiffer};
-
-
-
-
-var TypeToProcessorMap={
-
-CGColor:processColor,
-CGColorArray:processColor,
-UIColor:processColor,
-UIColorArray:processColor,
-
-Color:processColor};
-
-
-module.exports = requireNativeComponent;
-});
-__d('verifyPropTypes',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-
-
-
-
-var ReactNativeStyleAttributes=require('ReactNativeStyleAttributes');
-var View=require('View');
-
-
-
-
-
-
-
-function verifyPropTypes(
-componentInterface,
-viewConfig,
-nativePropsToIgnore)
-{
-if(!viewConfig){
-return;}
-
-var componentName=componentInterface.name || 
-componentInterface.displayName || 
-'unknown';
-if(!componentInterface.propTypes){
-throw new Error(
-'`' + componentName + '` has no propTypes defined`');}
-
-
-
-var nativeProps=viewConfig.NativeProps;
-for(var prop in nativeProps) {
-if(!componentInterface.propTypes[prop] && 
-!View.propTypes[prop] && 
-!ReactNativeStyleAttributes[prop] && (
-!nativePropsToIgnore || !nativePropsToIgnore[prop])){
-throw new Error(
-'`' + componentName + '` has no propType for native prop `' + 
-viewConfig.uiViewClassName + '.' + prop + '` of native type `' + 
-nativeProps[prop] + '`');}}}
-
-
-
-
-
-module.exports = verifyPropTypes;
-});
-__d('UnimplementedView',function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-
-
-var React=require('React');
-var StyleSheet=require('StyleSheet');
-var View=require('View');
-
-var UnimplementedView=React.createClass({displayName:'UnimplementedView',
-setNativeProps:function(){},
-
-
-
-
-render:function(){
-return (
-React.createElement(View,{style:[styles.unimplementedView,this.props.style]},
-this.props.children));}});
-
-
-
-
-
-var styles=StyleSheet.create({
-unimplementedView:{
-borderWidth:1,
-borderColor:'red',
-alignSelf:'flex-start'}});
-
-
-
-module.exports = UnimplementedView;
-});
 __d('StaticRenderer',function(global, require, module, exports) {  'use strict';
 
 
@@ -30805,7 +31355,6 @@ var React=require('React');
 var ReactNativeViewAttributes=require('ReactNativeViewAttributes');
 var View=require('View');
 
-var createReactNativeComponentClass=require('createReactNativeComponentClass');
 var deepDiffer=require('deepDiffer');
 var insetsDiffer=require('insetsDiffer');
 var merge=require('merge');
@@ -30850,7 +31399,8 @@ this.checkAnnotationIds(nextProps.annotations);}},
 
 
 
-propTypes:{
+propTypes:babelHelpers.extends({},
+View.propTypes,{
 
 
 
@@ -30873,6 +31423,13 @@ showsUserLocation:React.PropTypes.bool,
 
 
 showsPointsOfInterest:React.PropTypes.bool,
+
+
+
+
+
+
+showsCompass:React.PropTypes.bool,
 
 
 
@@ -31007,7 +31564,12 @@ onRegionChangeComplete:React.PropTypes.func,
 
 
 
-onAnnotationPress:React.PropTypes.func},
+onAnnotationPress:React.PropTypes.func,
+
+
+
+
+active:React.PropTypes.bool}),
 
 
 _onChange:function(event){
@@ -31051,29 +31613,8 @@ return React.createElement(RCTMap,babelHelpers.extends({},this.props,{onPress:th
 
 
 
-if(Platform.OS === 'android'){
-var RCTMap=createReactNativeComponentClass({
-validAttributes:merge(
-ReactNativeViewAttributes.UIView,{
-active:true,
-showsUserLocation:true,
-zoomEnabled:true,
-rotateEnabled:true,
-pitchEnabled:true,
-scrollEnabled:true,
-region:{diff:deepDiffer},
-annotations:{diff:deepDiffer},
-maxDelta:true,
-minDelta:true,
-legalLabelInsets:{diff:insetsDiffer}}),
-
-
-uiViewClassName:'RCTMap'});}else 
-
-{
 var RCTMap=requireNativeComponent('RCTMap',MapView,{
-nativeOnly:{onChange:true,onPress:true}});}
-
+nativeOnly:{onChange:true,onPress:true}});
 
 
 module.exports = MapView;
@@ -31491,7 +32032,6 @@ _this2._completeTransition();}});
 
 this.panGesture = PanResponder.create({
 onMoveShouldSetPanResponder:this._handleMoveShouldSetPanResponder,
-onPanResponderGrant:this._handlePanResponderGrant,
 onPanResponderRelease:this._handlePanResponderRelease,
 onPanResponderMove:this._handlePanResponderMove,
 onPanResponderTerminate:this._handlePanResponderTerminate});
@@ -31771,7 +32311,8 @@ var sceneConfig=this.state.sceneConfigStack[this.state.presentedIndex];
 if(!sceneConfig){
 return false;}
 
-this._expectingGestureGrant = this._matchGestureAction(this._eligibleGestures,sceneConfig.gestures,gestureState);
+this._expectingGestureGrant = 
+this._matchGestureAction(this._eligibleGestures,sceneConfig.gestures,gestureState);
 return !!this._expectingGestureGrant;},
 
 
@@ -31781,16 +32322,6 @@ gestureName === 'pop' || gestureName === 'jumpBack');
 var wouldOverswipeForward=this.state.presentedIndex >= this.state.routeStack.length - 1 && 
 gestureName === 'jumpForward';
 return wouldOverswipeForward || wouldOverswipeBack;},
-
-
-_handlePanResponderGrant:function(e,gestureState){
-invariant(
-this._expectingGestureGrant,
-'Responder granted unexpectedly.');
-
-this._attachGesture(this._expectingGestureGrant);
-this._onAnimationStart();
-this._expectingGestureGrant = null;},
 
 
 _deltaForGestureAction:function(gestureAction){
@@ -31897,6 +32428,16 @@ this._hideScenes();},
 
 
 _handlePanResponderMove:function(e,gestureState){
+if(this._isMoveGestureAttached !== undefined){
+invariant(
+this._expectingGestureGrant,
+'Responder granted unexpectedly.');
+
+this._attachGesture(this._expectingGestureGrant);
+this._onAnimationStart();
+this._expectingGestureGrant = undefined;}
+
+
 var sceneConfig=this.state.sceneConfigStack[this.state.presentedIndex];
 if(this.state.activeGesture){
 var gesture=sceneConfig.gestures[this.state.activeGesture];
@@ -31987,7 +32528,7 @@ return true;}else
 _this5._eligibleGestures = _this5._eligibleGestures.slice().splice(gestureIndex,1);}});
 
 
-return matchedGesture;},
+return matchedGesture || null;},
 
 
 _transitionSceneStyle:function(fromIndex,toIndex,progress,index){
@@ -41990,6 +42531,7 @@ var NativeMethodsMixin=require('NativeMethodsMixin');
 var React=require('React');
 var ReactPropTypes=require('ReactPropTypes');
 var ReactNativeViewAttributes=require('ReactNativeViewAttributes');
+var View=require('View');
 
 var requireNativeComponent=require('requireNativeComponent');
 
@@ -42038,7 +42580,8 @@ return ReactPropTypes.bool(props,propName,componentName) || checker();};
 
 
 var ProgressBarAndroid=React.createClass({displayName:'ProgressBarAndroid',
-propTypes:{
+propTypes:babelHelpers.extends({},
+View.propTypes,{
 
 
 
@@ -42066,7 +42609,7 @@ color:ReactPropTypes.string,
 
 
 
-testID:ReactPropTypes.string},
+testID:ReactPropTypes.string}),
 
 
 getDefaultProps:function(){
@@ -42224,10 +42767,11 @@ __d('Switch',function(global, require, module, exports) {  'use strict';
 
 
 
-var Platform=require('Platform');
 var NativeMethodsMixin=require('NativeMethodsMixin');
+var Platform=require('Platform');
 var React=require('React');
 var StyleSheet=require('StyleSheet');
+var View=require('View');
 
 var requireNativeComponent=require('requireNativeComponent');
 
@@ -42240,7 +42784,8 @@ var requireNativeComponent=require('requireNativeComponent');
 
 
 var Switch=React.createClass({displayName:'Switch',
-propTypes:{
+propTypes:babelHelpers.extends({},
+View.propTypes,{
 
 
 
@@ -42274,7 +42819,7 @@ onTintColor:React.PropTypes.string,
 
 
 
-thumbTintColor:React.PropTypes.string},
+thumbTintColor:React.PropTypes.string}),
 
 
 getDefaultProps:function(){
@@ -42333,7 +42878,7 @@ width:40}});
 
 
 if(Platform.OS === 'android'){
-var RCTSwitch=requireNativeComponent('AndroidSwitch',null,{
+var RCTSwitch=requireNativeComponent('AndroidSwitch',Switch,{
 nativeOnly:{onChange:true,on:true,enabled:true}});}else 
 
 {
@@ -42359,6 +42904,7 @@ __d('SwitchAndroid',function(global, require, module, exports) {  'use strict';
 var NativeMethodsMixin=require('NativeMethodsMixin');
 var PropTypes=require('ReactPropTypes');
 var React=require('React');
+var View=require('View');
 
 var requireNativeComponent=require('requireNativeComponent');
 
@@ -42370,7 +42916,8 @@ var SWITCH='switch';
 var SwitchAndroid=React.createClass({displayName:'SwitchAndroid',
 mixins:[NativeMethodsMixin],
 
-propTypes:{
+propTypes:babelHelpers.extends({},
+View.propTypes,{
 
 
 
@@ -42386,7 +42933,7 @@ onValueChange:PropTypes.func,
 
 
 
-testID:PropTypes.string},
+testID:PropTypes.string}),
 
 
 getDefaultProps:function(){
@@ -42425,7 +42972,12 @@ onResponderTerminationRequest:function(){return false;}}));}});
 
 
 
-var RKSwitch=requireNativeComponent('AndroidSwitch',null);
+var RKSwitch=requireNativeComponent('AndroidSwitch',SwitchAndroid,{
+nativeOnly:{
+on:true,
+enabled:true}});
+
+
 
 module.exports = SwitchAndroid;
 });
@@ -42527,9 +43079,9 @@ __d('TextInput',function(global, require, module, exports) {  'use strict';
 var DocumentSelectionState=require('DocumentSelectionState');
 var EventEmitter=require('EventEmitter');
 var NativeMethodsMixin=require('NativeMethodsMixin');
-var RCTUIManager=require('NativeModules').UIManager;
 var Platform=require('Platform');
 var PropTypes=require('ReactPropTypes');
+var RCTUIManager=require('NativeModules').UIManager;
 var React=require('React');
 var ReactChildren=require('ReactChildren');
 var StyleSheet=require('StyleSheet');
@@ -42537,6 +43089,7 @@ var Text=require('Text');
 var TextInputState=require('TextInputState');
 var TimerMixin=require('react-timer-mixin/TimerMixin.js');
 var TouchableWithoutFeedback=require('TouchableWithoutFeedback');
+var View=require('View');
 
 var createReactNativeComponentClass=require('createReactNativeComponentClass');
 var emptyFunction=require('emptyFunction');
@@ -42603,7 +43156,8 @@ statics:{
 State:TextInputState},
 
 
-propTypes:{
+propTypes:babelHelpers.extends({},
+View.propTypes,{
 
 
 
@@ -42831,7 +43385,7 @@ testID:PropTypes.string,
 
 
 
-underlineColorAndroid:PropTypes.string},
+underlineColorAndroid:PropTypes.string}),
 
 
 getDefaultProps:function(){
@@ -44130,6 +44684,7 @@ var RCTUIManager=require('NativeModules').UIManager;
 var React=require('React');
 var ReactNativeViewAttributes=require('ReactNativeViewAttributes');
 var ReactPropTypes=require('ReactPropTypes');
+var View=require('View');
 
 var requireNativeComponent=require('requireNativeComponent');
 var resolveAssetSource=require('resolveAssetSource');
@@ -44179,7 +44734,8 @@ ReactPropTypes.oneOf([])]);
 var ToolbarAndroid=React.createClass({displayName:'ToolbarAndroid',
 mixins:[NativeMethodsMixin],
 
-propTypes:{
+propTypes:babelHelpers.extends({},
+View.propTypes,{
 
 
 
@@ -44239,7 +44795,7 @@ titleColor:ReactPropTypes.string,
 
 
 
-testID:ReactPropTypes.string},
+testID:ReactPropTypes.string}),
 
 
 render:function(){
@@ -44256,7 +44812,7 @@ if(this.props.overflowIcon){
 nativeProps.overflowIcon = resolveAssetSource(this.props.overflowIcon);}
 
 if(this.props.actions){
-nativeProps.actions = [];
+var nativeActions=[];
 for(var i=0;i < this.props.actions.length;i++) {
 var action=babelHelpers.extends({},
 this.props.actions[i]);
@@ -44267,8 +44823,9 @@ action.icon = resolveAssetSource(action.icon);}
 if(action.show){
 action.show = RCTUIManager.ToolbarAndroid.Constants.ShowAsAction[action.show];}
 
-nativeProps.actions.push(action);}}
+nativeActions.push(action);}
 
+nativeProps.nativeActions = nativeActions;}
 
 
 return React.createElement(NativeToolbar,babelHelpers.extends({onSelect:this._onSelect},nativeProps));},
@@ -44296,7 +44853,11 @@ title:true,
 titleColor:true});
 
 
-var NativeToolbar=requireNativeComponent('ToolbarAndroid',null);
+var NativeToolbar=requireNativeComponent('ToolbarAndroid',ToolbarAndroid,{
+nativeOnly:{
+nativeActions:true}});
+
+
 
 module.exports = ToolbarAndroid;
 });
@@ -44593,11 +45154,11 @@ var ReactNativeViewAttributes=require('ReactNativeViewAttributes');
 var Touchable=require('Touchable');
 var TouchableWithoutFeedback=require('TouchableWithoutFeedback');
 
-var createReactNativeComponentClass=require('createReactNativeComponentClass');
 var createStrictShapeTypeChecker=require('createStrictShapeTypeChecker');
 var ensurePositiveDelayProps=require('ensurePositiveDelayProps');
 var onlyChild=require('onlyChild');
 var processColor=require('processColor');
+var requireNativeComponent=require('requireNativeComponent');
 
 var rippleBackgroundPropType=createStrictShapeTypeChecker({
 type:React.PropTypes.oneOf(['RippleAndroid']),
@@ -44615,12 +45176,10 @@ rippleBackgroundPropType,
 themeAttributeBackgroundPropType]);
 
 
-var TouchableView=createReactNativeComponentClass({
-validAttributes:babelHelpers.extends({},
-ReactNativeViewAttributes.UIView,{
-nativeBackgroundAndroid:backgroundPropType}),
+var TouchableView=requireNativeComponent('RCTView',null,{
+nativeOnly:{
+nativeBackgroundAndroid:backgroundPropType}});
 
-uiViewClassName:'RCTView'});
 
 
 var PRESS_RETENTION_OFFSET={top:20,left:20,right:20,bottom:30};
@@ -47243,17 +47802,18 @@ __d('ViewPagerAndroid',function(global, require, module, exports) {  'use strict
 
 
 
-var NativeModules=require('NativeModules');
 var NativeMethodsMixin=require('NativeMethodsMixin');
+var NativeModules=require('NativeModules');
 var React=require('React');
 var ReactElement=require('ReactElement');
 var ReactNativeViewAttributes=require('ReactNativeViewAttributes');
 var ReactPropTypes=require('ReactPropTypes');
+var View=require('View');
 
 var RCTUIManager=NativeModules.UIManager;
 
-var createReactNativeComponentClass=require('createReactNativeComponentClass');
 var dismissKeyboard=require('dismissKeyboard');
+var requireNativeComponent=require('requireNativeComponent');
 
 var VIEWPAGER_REF='viewPager';
 
@@ -47297,7 +47857,8 @@ var VIEWPAGER_REF='viewPager';
 
 var ViewPagerAndroid=React.createClass({displayName:'ViewPagerAndroid',
 
-propTypes:{
+propTypes:babelHelpers.extends({},
+View.propTypes,{
 
 
 
@@ -47330,7 +47891,7 @@ onPageSelected:ReactPropTypes.func,
 
 keyboardDismissMode:ReactPropTypes.oneOf([
 'none',
-'on-drag'])},
+'on-drag'])}),
 
 
 
@@ -47424,10 +47985,7 @@ children:this._childrenWithOverridenStyle()}));}});
 
 
 
-var NativeAndroidViewPager=createReactNativeComponentClass({
-validAttributes:ReactNativeViewAttributes.UIView,
-uiViewClassName:'AndroidViewPager'});
-
+var NativeAndroidViewPager=requireNativeComponent('AndroidViewPager',ViewPagerAndroid);
 
 module.exports = ViewPagerAndroid;
 });
@@ -47449,9 +48007,9 @@ var ReactNativeViewAttributes=require('ReactNativeViewAttributes');
 var StyleSheet=require('StyleSheet');
 var View=require('View');
 
-var createReactNativeComponentClass=require('createReactNativeComponentClass');
 var keyMirror=require('keyMirror');
 var merge=require('merge');
+var requireNativeComponent=require('requireNativeComponent');
 
 var PropTypes=React.PropTypes;
 var RCTUIManager=require('NativeModules').UIManager;
@@ -47470,7 +48028,8 @@ ERROR:null});
 
 var WebView=React.createClass({displayName:'WebView',
 
-propTypes:{
+propTypes:babelHelpers.extends({},
+View.propTypes,{
 renderError:PropTypes.func,
 renderLoading:PropTypes.func,
 url:PropTypes.string,
@@ -47495,7 +48054,7 @@ userAgent:PropTypes.string,
 
 
 
-testID:PropTypes.string},
+testID:PropTypes.string}),
 
 
 getInitialState:function(){
@@ -47620,16 +48179,7 @@ this.updateNavigationState(event);}});
 
 
 
-var RCTWebView=createReactNativeComponentClass({
-validAttributes:merge(ReactNativeViewAttributes.UIView,{
-html:true,
-injectedJavaScript:true,
-javaScriptEnabledAndroid:true,
-url:true,
-userAgent:true}),
-
-uiViewClassName:'RCTWebView'});
-
+var RCTWebView=requireNativeComponent('RCTWebView',WebView);
 
 var styles=StyleSheet.create({
 container:{
@@ -47950,6 +48500,7 @@ __d('renderApplication',function(global, require, module, exports) {  'use stric
 
 
 
+
 var Inspector=require('Inspector');
 var Portal=require('Portal');
 var RCTDeviceEventEmitter=require('RCTDeviceEventEmitter');
@@ -47959,6 +48510,8 @@ var Subscribable=require('Subscribable');
 var View=require('View');
 
 var invariant=require('invariant');
+
+var YellowBox=__DEV__?require('YellowBox'):null;
 
 
 require('BackAndroid');
@@ -48029,10 +48582,14 @@ importantForAccessibility:this.state.rootImportanceForAccessibility})),
 React.createElement(Portal,{
 onModalVisibilityChanged:this.setRootAccessibility}));
 
+var yellowBox=null;
+if(__DEV__){
+yellowBox = React.createElement(YellowBox,null);}
 
 return this.state.enabled?
 React.createElement(View,{style:styles.appContainer},
 appView,
+yellowBox,
 this.renderInspector()):
 
 appView;}});
@@ -49204,6 +49761,355 @@ bottom:0}});
 
 
 module.exports = Portal;
+});
+__d('YellowBox',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+
+
+var EventEmitter=require('EventEmitter');
+
+var Map=require('Map');
+var Platform=require('Platform');
+var React=require('React');
+var StyleSheet=require('StyleSheet');
+
+var _warningEmitter=new EventEmitter();
+var _warningMap=new Map();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if(__DEV__){var _console=
+console;var error=_console.error;var warn=_console.warn;
+console.error = function(){
+error.apply(console,arguments);
+
+if(typeof arguments[0] === 'string' && 
+arguments[0].startsWith('Warning: ')){
+updateWarningMap.apply(null,arguments);}};
+
+
+console.warn = function(){
+warn.apply(console,arguments);
+updateWarningMap.apply(null,arguments);};}
+
+
+
+
+
+
+
+
+
+
+
+
+function sprintf(format){for(var _len=arguments.length,args=Array(_len > 1?_len - 1:0),_key=1;_key < _len;_key++) {args[_key - 1] = arguments[_key];}
+var index=0;
+return format.replace(/%s/g,function(match){return args[index++];});}
+
+
+function updateWarningMap(format){
+var stringifySafe=require('stringifySafe');
+
+format = String(format);
+var argCount=(format.match(/%s/g) || []).length;for(var _len2=arguments.length,args=Array(_len2 > 1?_len2 - 1:0),_key2=1;_key2 < _len2;_key2++) {args[_key2 - 1] = arguments[_key2];}
+var warning=[
+sprintf.apply(undefined,[format].concat(babelHelpers.toConsumableArray(args.slice(0,argCount))))].concat(babelHelpers.toConsumableArray(
+args.slice(argCount).map(stringifySafe))).
+join(' ');
+
+var count=_warningMap.has(warning)?_warningMap.get(warning):0;
+_warningMap.set(warning,count + 2);
+_warningEmitter.emit('warning',_warningMap);}
+
+
+function isWarningIgnored(warning){
+return (
+Array.isArray(console.ignoredYellowBox) && 
+console.ignoredYellowBox.some(
+function(ignorePrefix){return warning.startsWith(ignorePrefix);}));}
+
+
+
+
+var WarningRow=function(_ref){var count=_ref.count;var warning=_ref.warning;var onPress=_ref.onPress;
+var Text=require('Text');
+var TouchableHighlight=require('TouchableHighlight');
+var View=require('View');
+
+var countText=count > 1?
+React.createElement(Text,{style:styles.listRowCount},'(' + count + ') '):
+null;
+
+return (
+React.createElement(View,{style:styles.listRow},
+React.createElement(TouchableHighlight,{
+activeOpacity:0.5,
+onPress:onPress,
+style:styles.listRowContent,
+underlayColor:'transparent'},
+React.createElement(Text,{style:styles.listRowText,numberOfLines:2},
+countText,
+warning))));};
+
+
+
+
+
+
+var WarningInspector=function(_ref2){var count=_ref2.count;var warning=_ref2.warning;var onClose=_ref2.onClose;var onDismiss=_ref2.onDismiss;
+var ScrollView=require('ScrollView');
+var Text=require('Text');
+var TouchableHighlight=require('TouchableHighlight');
+var View=require('View');
+
+var countSentence=
+'Warning encountered ' + count + ' time' + (count - 1?'s':'') + '.';
+
+return (
+React.createElement(TouchableHighlight,{
+activeOpacity:0.95,
+underlayColor:backgroundColor(0.8),
+onPress:onClose,
+style:styles.inspector},
+React.createElement(View,{style:styles.inspectorContent},
+React.createElement(View,{style:styles.inspectorCount},
+React.createElement(Text,{style:styles.inspectorCountText},countSentence)),
+
+React.createElement(ScrollView,{style:styles.inspectorWarning},
+React.createElement(Text,{style:styles.inspectorWarningText},warning)),
+
+React.createElement(View,{style:styles.inspectorButtons},
+React.createElement(TouchableHighlight,{
+activeOpacity:0.5,
+onPress:onDismiss,
+style:styles.inspectorButton,
+underlayColor:'transparent'},
+React.createElement(Text,{style:styles.inspectorButtonText},'Dismiss Warning'))))));};var 
+
+
+
+
+
+
+
+
+
+YellowBox=(function(_React$Component){babelHelpers.inherits(YellowBox,_React$Component);
+
+
+
+
+
+
+function YellowBox(props,context){babelHelpers.classCallCheck(this,YellowBox);var _this=babelHelpers.possibleConstructorReturn(this,Object.getPrototypeOf(YellowBox).call(this,
+props,context));
+_this.state = {
+inspecting:null,
+warningMap:_warningMap};
+
+_this.dismissWarning = function(warning){var _this$state=
+_this.state;var inspecting=_this$state.inspecting;var warningMap=_this$state.warningMap;
+warningMap.delete(warning);
+_this.setState({
+inspecting:inspecting === warning?null:inspecting,
+warningMap:warningMap});};return _this;}babelHelpers.createClass(YellowBox,[{key:'componentDidMount',value:function componentDidMount()
+
+
+
+
+{var _this2=this;
+var scheduled=null;
+this._listener = _warningEmitter.addListener('warning',function(warningMap){
+
+
+scheduled = scheduled || setImmediate(function(){
+scheduled = null;
+_this2.setState({
+warningMap:warningMap});});});}},{key:'componentWillUnmount',value:function componentWillUnmount()
+
+
+
+
+
+{
+if(this._listener){
+this._listener.remove();}}},{key:'render',value:function render()
+
+
+
+{var _this3=this;
+if(console.disableYellowBox || this.state.warningMap.size === 0){
+return null;}
+
+var ScrollView=require('ScrollView');
+var View=require('View');
+
+var inspecting=this.state.inspecting;
+var inspector=inspecting !== null?
+React.createElement(WarningInspector,{
+count:this.state.warningMap.get(inspecting),
+warning:inspecting,
+onClose:function(){return _this3.setState({inspecting:null});},
+onDismiss:function(){return _this3.dismissWarning(inspecting);}}):
+
+null;
+
+var rows=[];
+this.state.warningMap.forEach(function(count,warning){
+if(!isWarningIgnored(warning)){
+rows.push(
+React.createElement(WarningRow,{
+key:warning,
+count:count,
+warning:warning,
+onPress:function(){return _this3.setState({inspecting:warning});},
+onDismiss:function(){return _this3.dismissWarning(warning);}}));}});
+
+
+
+
+
+var listStyle=[
+styles.list,
+
+{height:Math.min(rows.length,4.4) * (rowGutter + rowHeight)}];
+
+return (
+React.createElement(View,{style:inspector?styles.fullScreen:listStyle},
+React.createElement(ScrollView,{style:listStyle},
+rows),
+
+inspector));}}]);return YellowBox;})(React.Component);
+
+
+
+
+
+var backgroundColor=function(opacity){return 'rgba(250, 186, 48, ' + opacity + ')';};
+var textColor='white';
+var rowGutter=1;
+var rowHeight=46;
+
+var styles=StyleSheet.create({
+fullScreen:{
+backgroundColor:'transparent',
+position:'absolute',
+left:0,
+right:0,
+top:0,
+bottom:0},
+
+inspector:{
+backgroundColor:backgroundColor(0.95),
+flex:1},
+
+inspectorContainer:{
+flex:1},
+
+inspectorButtons:{
+flexDirection:'row',
+position:'absolute',
+left:0,
+right:0,
+bottom:0},
+
+inspectorButton:{
+padding:22,
+position:'absolute',
+left:0,
+right:0,
+bottom:0},
+
+inspectorButtonText:{
+color:textColor,
+fontSize:14,
+opacity:0.8,
+textAlign:'center'},
+
+inspectorContent:{
+flex:1,
+paddingTop:5},
+
+inspectorCount:{
+padding:15,
+paddingBottom:0},
+
+inspectorCountText:{
+color:textColor,
+fontSize:14},
+
+inspectorWarning:{
+padding:15,
+position:'absolute',
+top:39,
+bottom:60},
+
+inspectorWarningText:{
+color:textColor,
+fontSize:16,
+fontWeight:'600'},
+
+list:{
+backgroundColor:'transparent',
+position:'absolute',
+left:0,
+right:0,
+bottom:0},
+
+listRow:{
+position:'relative',
+backgroundColor:backgroundColor(0.95),
+flex:1,
+height:rowHeight,
+marginTop:rowGutter},
+
+listRowContent:{
+flex:1},
+
+listRowCount:{
+color:'rgba(255, 255, 255, 0.5)'},
+
+listRowText:{
+color:textColor,
+position:'absolute',
+left:0,
+top:Platform.OS === 'android'?5:7,
+marginLeft:15,
+marginRight:15}});
+
+
+
+module.exports = YellowBox;
 });
 __d('BackAndroid',function(global, require, module, exports) {  'use strict';
 
@@ -55435,68 +56341,195 @@ Object.keys(componentOrElement));}
 
 module.exports = findDOMNode;
 });
-__d('AwesomeProject/js/Setting/PrivacySetting.js',function(global, require, module, exports) {  'use strict';
+__d('AwesomeProject/js/reactjs/Setting/PrivacySetting.js',function(global, require, module, exports) {  'use strict';
 
 
 
 
 var React=require('React');
 
-var SwitchAndroid=require('SwitchAndroid');
+var SwitchWeibo=require('SwitchWeibo');
 var Text=require('Text');
 var StyleSheet=require('StyleSheet');
 var PageBlock=require('PageBlock');
 var PageView=require('PageView');
+var View=require('View');
+var TouchableHighlight=require('TouchableHighlight');
 var SwitchItem=require('SwitchItem');
+var WeiboPrivacyAndroid=require('WeiboPrivacyAndroid');
 
 var PrivacySettingPage=React.createClass({displayName:'PrivacySettingPage',
+propTypes:{
+result:React.PropTypes.object},
+
 
 getInitialState:function(){
 return {
-trueSwitchIsOn:true,
-falseSwitchIsOn:false,
-colorTrueSwitchIsOn:true};},
+mobileSwitchIsOn:true,
+contactListSwitchIsOn:false,
+picCmtSwitchIsOn:true,
+contactId:'contact_list',
+mobileId:'mobile',
+piccmtinId:'pic_cmt_in'};},
 
 
 
 render:function(){var _this=this;
-return (
-React.createElement(PageView,{title:'隐私设置'},
+console.log('render');
+var bindstatus;
+if(this.props.result){
+console.log(WeiboPrivacyAndroid.Tag,'PrivacySettingPage',this.props.result.privacy.comment,this.props.result.privacy.mobile,this.props.result.privacy.bindstatus,
+this.props.result.mention.mention,this.props.result.mention.contact_list,this.props.result.mention.pic_cmt_in);
+if(this.props.result.privacy.bindstatus){
+if(this.props.result.privacy.bindstatus == 1){
+bindstatus = 
 React.createElement(PageBlock,{title:'通讯录'},
-React.createElement(SwitchItem,{title:'允许给我推荐通讯录好友'},
-React.createElement(SwitchAndroid,{
-onValueChange:function(value){return _this.setState({trueSwitchIsOn:value});},
-value:this.state.trueSwitchIsOn})),
+React.createElement(SwitchItem,{title:'允许给我推荐通讯录好友',mobileSwitchIsOn:this.state.mobileSwitchIsOn},
+React.createElement(SwitchWeibo,{
+onValueChange:function(value){_this.setState({contactListSwitchIsOn:value});_this.handleSwitchChange(_this.state.contactId,_this.state.contactListSwitchIsOn);},
+value:this.state.contactListSwitchIsOn})),
 
 
 React.createElement(SwitchItem,{title:'允许通过此手机号搜到我'},
-React.createElement(SwitchAndroid,{
-onValueChange:function(value){return _this.setState({falseSwitchIsOn:value});},
-value:this.state.falseSwitchIsOn}))),
+React.createElement(SwitchWeibo,{
+onValueChange:function(value){_this.setState({mobileSwitchIsOn:value});_this.handleSwitchChange(_this.state.mobileId,_this.state.mobileSwitchIsOn);},
+value:this.state.mobileSwitchIsOn})));}}}
 
 
+
+
+
+
+return (
+React.createElement(PageView,{title:'隐私设置'},
+bindstatus,
 React.createElement(PageBlock,{title:'哪些人可以评论我的微博',description:'关闭后，你的通讯录好友将不能通过通讯录找到你'},
-React.createElement(SwitchItem,{title:'所有人'}),
-React.createElement(SwitchItem,{title:'我关注的人'}),
-React.createElement(SwitchItem,{title:'我的粉丝'})),
+React.createElement(SwitchItem,{type:'comment',id:'0',title:'所有人'}),
+React.createElement(SwitchItem,{type:'comment',id:'1',title:'我关注的人'}),
+React.createElement(SwitchItem,{type:'comment',id:'3',title:'我的粉丝'})),
 
 React.createElement(PageBlock,{title:''},
 React.createElement(SwitchItem,{title:'允许评论带图'},
-React.createElement(SwitchAndroid,{
-onValueChange:function(value){return _this.setState({colorTrueSwitchIsOn:value});},
-value:this.state.colorTrueSwitchIsOn}))),
+React.createElement(SwitchWeibo,{
+onValueChange:function(value){_this.setState({picCmtSwitchIsOn:value});_this.handleSwitchChange(_this.state.piccmtinId,_this.state.picCmtSwitchIsOn);},
+value:this.state.picCmtSwitchIsOn}))),
 
 
 React.createElement(PageBlock,{title:'我可以收到哪些人的@提醒',description:'关闭后，其他人将不能在你的微博下发布带图片的评论'},
-React.createElement(SwitchItem,{title:'所有人'}),
-React.createElement(SwitchItem,{title:'我关注的人'}))));}});
+React.createElement(SwitchItem,{type:'mention',id:'0',title:'所有人'}),
+React.createElement(SwitchItem,{type:'mention',id:'1',title:'我关注的人'}))));},
 
 
 
+
+
+
+handleSwitchChange:function(key,bool){
+var value;
+if(bool){
+value = 1;}else 
+{
+value = 0;}
+
+var json='{' + key + ':' + value + '}';
+console.log(json);
+WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);}});
 
 
 
 module.exports = PrivacySettingPage;
+});
+__d('SwitchWeibo',function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+
+
+
+
+
+var NativeMethodsMixin=require('NativeMethodsMixin');
+var PropTypes=require('ReactPropTypes');
+var React=require('React');
+var View=require('View');
+
+var requireNativeComponent=require('requireNativeComponent');
+
+var SWITCH='switch';
+
+
+
+
+var SwitchWeibo=React.createClass({displayName:'SwitchWeibo',
+mixins:[NativeMethodsMixin],
+
+propTypes:babelHelpers.extends({},
+View.propTypes,{
+
+
+
+value:PropTypes.bool,
+
+
+
+disabled:PropTypes.bool,
+
+
+
+onValueChange:PropTypes.func,
+
+
+
+testID:PropTypes.string}),
+
+
+getDefaultProps:function(){
+return {
+value:false,
+disabled:false};},
+
+
+
+_onChange:function(event){
+
+
+this.refs[SWITCH].setNativeProps({on:this.props.value});
+
+if(this.props.value === event.nativeEvent.value || this.props.disabled){
+return;}
+
+
+this.props.onChange && this.props.onChange(event);
+this.props.onValueChange && this.props.onValueChange(event.nativeEvent.value);},
+
+
+render:function(){
+return (
+React.createElement(RKSwitch,{
+ref:SWITCH,
+style:this.props.style,
+enabled:!this.props.disabled,
+on:this.props.value,
+onChange:this._onChange,
+testID:this.props.testID,
+onStartShouldSetResponder:function(){return true;},
+onResponderTerminationRequest:function(){return false;}}));}});
+
+
+
+
+
+var RKSwitch=requireNativeComponent('WeiboSwitch',SwitchWeibo,{
+nativeOnly:{
+on:true,
+enabled:true}});
+
+
+
+module.exports = SwitchWeibo;
 });
 __d('PageBlock',function(global, require, module, exports) {  'use strict';
 
@@ -55748,15 +56781,31 @@ StyleSheet=
 
 React.StyleSheet;var Text=React.Text;var View=React.View;var TouchableHighlight=React.TouchableHighlight;
 
+var WeiboPrivacyAndroid=require('WeiboPrivacyAndroid');
+
 var SwitchItem=React.createClass({displayName:'SwitchItem',
 propTypes:{
+type:React.PropTypes.string,
+id:React.PropTypes.string,
+selected:React.PropTypes.bool,
+
 title:React.PropTypes.string,
 description:React.PropTypes.string},
 
 
+getInitialStates:function(){
+return {
+comment_all:0,
+comment_myfavorite:1,
+comment_myfollow:2,
+metion_all:0,
+mention_myfavorite:1};},
+
+
+
 render:function(){
 return (
-React.createElement(TouchableHighlight,null,
+React.createElement(TouchableHighlight,{onPress:this.handleUpdateState},
 React.createElement(View,{style:styles.container},
 React.createElement(View,null,
 React.createElement(Text,{style:styles.titleText},
@@ -55764,11 +56813,23 @@ this.props.title)),
 
 
 React.createElement(View,{style:styles.children},
-this.props.children))));}});
+this.props.children))));},
 
 
 
 
+
+
+handleUpdateState:function(){
+console.log('handle update');
+if(this.props.type == 'comment'){}
+
+
+var test=this.props.id + ':0';
+console.log(test);
+var json='{' + this.props.id + ':' + 1 + '}';
+console.log(JSON.stringify(json));
+WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);}});
 
 
 
@@ -55794,6 +56855,43 @@ justifyContent:'center'}});
 
 module.exports = SwitchItem;
 });
+__d('WeiboPrivacyAndroid',function(global, require, module, exports) {  'use strict';var _require=
+
+
+
+
+
+
+
+
+
+
+
+require('react-native/Libraries/react-native/react-native.js');var NativeModules=_require.NativeModules;
+
+var RCTWeiboPrivacyAndroid=NativeModules.WeiboPrivacyAndroid;
+
+var WeiboPrivacyAndroid={
+Tag:RCTWeiboPrivacyAndroid.Tag,
+
+getStates:function(
+url,
+callback)
+{
+RCTWeiboPrivacyAndroid.getStates(url,callback);},
+
+
+updateState:function(
+url,
+jsondata)
+{
+RCTWeiboPrivacyAndroid.updateState(url,jsondata);}};
+
+
+
+
+module.exports = WeiboPrivacyAndroid;
+});
 ;require("InitializeJavaScriptAppEngine");
-;require("AwesomeProject/js/Setting/privacySetting.android.js");
-//@ sourceMappingURL=/demo-for-eclipse/react_native_demo/js/Setting/privacySetting.android.map?platform=android&dev=true
+;require("AwesomeProject/js/reactjs/Setting/privacySetting.android.js");
+//@ sourceMappingURL=/demo-for-eclipse/react_native_demo/js/reactjs/Setting/privacySetting.android.map?platform=android&dev=true
