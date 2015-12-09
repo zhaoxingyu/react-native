@@ -178,4 +178,11 @@ var PrivacySettingPage = React.createClass({
   
 });
 
+var styles = StyleSheet.create({
+	text: {
+	    fontSize: 12,
+	    color: '#4EB934',
+	  },
+});
+
 module.exports = PrivacySettingPage;
