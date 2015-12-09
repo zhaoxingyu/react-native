@@ -59,20 +59,23 @@ var PrivacySettingPage = React.createClass({
 	  var updateUI = false;  
 	  if(first_update){
 		  updateUI = true;
-		  first_update = false;
 	  }
 	  //判断comment id 是否有更新
 	  if(this.state.currentCommentId !== nextState.currentCommentId){
 		  console.log('shouldComponentUpdate comment id: ' + nextState.currentCommentId + " prev id: " + this.state.currentCommentId);
 		  var json = '{comment:'+nextState.currentCommentId+'}';
-		  WeiboPrivacyAndroid.updateState(json);
+		  if(!first_update){
+			  WeiboPrivacyAndroid.updateState(json);
+		  }
 		  updateUI = true;
 	  }
 	  //判断mention id 是否有更新
 	  if(this.state.currentMentionId !== nextState.currentMentionId){
 		  console.log('shouldComponentUpdate mention id: ' + nextState.currentMentionId + " prev id: " + this.state.currentMentionId);
 		  var json = '{mention:'+nextState.currentMentionId+'}';
-		  WeiboPrivacyAndroid.updateState(json);
+		  if(!first_update){
+			  WeiboPrivacyAndroid.updateState(json);
+		  }
 		  updateUI = true;
 	  }
 	  
@@ -81,6 +84,10 @@ var PrivacySettingPage = React.createClass({
 			  ||this.state.contactListSwitchIsOn !== nextState.contactListSwitchIsOn 
 			  ||this.state.picCmtSwitchIsOn !== nextState.picCmtSwitchIsOn){
 		  updateUI = true;
+	  }
+	  
+	  if(first_update){
+		  first_update = false;
 	  }
 
 	  return updateUI;
