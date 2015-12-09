@@ -60,11 +60,11 @@ var styles = StyleSheet.create({
     color: '#333333',
   },
   children: {
-	position: 'absolute',
+	position: 'absolute',	
     right: 10,
+    top:5,
+    bottom:5,
     flexDirection:'row',
-    alignItems: 'center', 
-    justifyContent: 'center',
   }
 });
 

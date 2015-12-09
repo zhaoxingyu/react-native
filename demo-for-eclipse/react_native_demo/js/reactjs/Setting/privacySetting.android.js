@@ -20,7 +20,7 @@ var PrivacySetting = React.createClass({
 	  
 	componentWillMount:function(){
 		console.log(WeiboPrivacyAndroid.Tag,'index componentWillMount');
-		WeiboPrivacyAndroid.getStates("http://10.13.130.73/2/setting/getprivacy",(result) => {
+		WeiboPrivacyAndroid.getStates((result) => {
 			console.log(WeiboPrivacyAndroid.Tag,'index request states result:',result);
 			this.setState({
 				result:JSON.parse(result),

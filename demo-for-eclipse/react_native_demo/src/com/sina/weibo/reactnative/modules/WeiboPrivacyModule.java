@@ -30,6 +30,9 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 	private static final String KEY_CONTACT_LIST = "contact_list";
 	private static final String KEY_PIC_CMT_IN = "pic_cmt_in";
 //	private Context mContext;
+	private static final String GET_URL="http://10.13.130.73/2/setting/getprivacy";
+	private static final String SET_URL="http://api.weibo.cn/2/setting/setprivacy";
+	
 
 	public WeiboPrivacyModule(ReactApplicationContext reactContext) {
 		super(reactContext);
@@ -49,7 +52,7 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 	 }
 	
 	@ReactMethod
-	public void getStates(String url, Callback result){
+	public void getStates(Callback result){
 		JSONObject jsonData =  getJsonData();	
 		
 		//使用weibo中的网络请求流程，集成到微博工程之后可以使用
@@ -115,7 +118,7 @@ public class WeiboPrivacyModule  extends ReactContextBaseJavaModule {
 	}
 	
 	@ReactMethod
-	public void updateState(String url, String jsonString){
+	public void updateState(String jsonString){
 		JSONObject json = new JSONObject();
 		//RequestParam param = new RequestParam(mContext,user);
 		try {

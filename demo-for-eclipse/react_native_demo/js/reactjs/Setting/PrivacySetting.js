@@ -65,14 +65,14 @@ var PrivacySettingPage = React.createClass({
 	  if(this.state.currentCommentId !== nextState.currentCommentId){
 		  console.log('shouldComponentUpdate comment id: ' + nextState.currentCommentId + " prev id: " + this.state.currentCommentId);
 		  var json = '{comment:'+nextState.currentCommentId+'}';
-		  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
+		  WeiboPrivacyAndroid.updateState(json);
 		  updateUI = true;
 	  }
 	  //判断mention id 是否有更新
 	  if(this.state.currentMentionId !== nextState.currentMentionId){
 		  console.log('shouldComponentUpdate mention id: ' + nextState.currentMentionId + " prev id: " + this.state.currentMentionId);
 		  var json = '{mention:'+nextState.currentMentionId+'}';
-		  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json);
+		  WeiboPrivacyAndroid.updateState(json);
 		  updateUI = true;
 	  }
 	  
@@ -113,21 +113,21 @@ var PrivacySettingPage = React.createClass({
         	<TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.all});}}>
         		<View>
         			<SwitchItem title="所有人">
-        				<Text>{this.state.currentCommentId===this.state.all?'√':''}</Text>
+        				<Text style={styles.text}>{this.state.currentCommentId===this.state.all?'√':''}</Text>
         			</SwitchItem>
         		</View>
 	        </TouchableHighlight>
 	        <TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.myfollow});}}>
     			<View>
     				<SwitchItem title="我关注的人">
-        				<Text>{this.state.currentCommentId===this.state.myfollow?'√':''}</Text>
+        				<Text style={styles.text}>{this.state.currentCommentId===this.state.myfollow?'√':''}</Text>
         			</SwitchItem>
     			</View>
 	        </TouchableHighlight>
     		<TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.myfans});}}>
     			<View>
     				<SwitchItem title="我的粉丝">
-        				<Text>{this.state.currentCommentId===this.state.myfans?'√':''}</Text>
+        				<Text style={styles.text}>{this.state.currentCommentId===this.state.myfans?'√':''}</Text>
         			</SwitchItem>
     			</View>
 	        </TouchableHighlight>
@@ -143,14 +143,14 @@ var PrivacySettingPage = React.createClass({
         	<TouchableHighlight onPress={()=>{this.setState({currentMentionId:this.state.all});}}>
         		<View>
         			<SwitchItem title="所有人">
-        				<Text>{this.state.currentMentionId===this.state.all?'√':''}</Text>
+        				<Text style={styles.text}>{this.state.currentMentionId===this.state.all?'√':''}</Text>
         			</SwitchItem>
         		</View>
 	        </TouchableHighlight>
 			<TouchableHighlight onPress={()=>{this.setState({currentMentionId:this.state.myfollow});}}>
 				<View>
 					<SwitchItem title="我关注的人">
-						<Text>{this.state.currentMentionId===this.state.myfollow?'√':''}</Text>
+						<Text style={styles.text}>{this.state.currentMentionId===this.state.myfollow?'√':''}</Text>
 					</SwitchItem>
 				</View>
 	        </TouchableHighlight>
@@ -173,14 +173,16 @@ var PrivacySettingPage = React.createClass({
 	  }
 	  var json = '{'+key+':'+value+'}';
 	  console.log(json);
-	  WeiboPrivacyAndroid.updateState('http://api.weibo.cn/2/setting/setprivacy',json); 
+	  WeiboPrivacyAndroid.updateState(json); 
   },
   
 });
 
 var styles = StyleSheet.create({
 	text: {
-	    fontSize: 12,
+		paddingRight:10,
+	    fontSize: 22,
+	    fontWeight: '200',
 	    color: '#4EB934',
 	  },
 });

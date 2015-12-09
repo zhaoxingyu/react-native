@@ -18,17 +18,15 @@ var WeiboPrivacyAndroid = {
   Tag:RCTWeiboPrivacyAndroid.Tag,
   
   getStates: function (
-    url: string,
     callback: Function,
   ): void {
-    RCTWeiboPrivacyAndroid.getStates(url,callback);
+    RCTWeiboPrivacyAndroid.getStates(callback);
   },
   
   updateState: function(
-	url: string,
 	jsondata: string,
 	):void{
-	RCTWeiboPrivacyAndroid.updateState(url,jsondata); 
+	RCTWeiboPrivacyAndroid.updateState(jsondata); 
   },
 
 };
