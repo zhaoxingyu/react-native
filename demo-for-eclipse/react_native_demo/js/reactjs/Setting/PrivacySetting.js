@@ -16,8 +16,6 @@ var TouchableHighlight = require('TouchableHighlight');
 var SwitchItem = require('SwitchItem');
 var WeiboPrivacyAndroid = require('WeiboPrivacyAndroid');
 
-var checked = require('image!common_checkbox_checked');
-var unchecked = require('image!common_checkbox_unchecked');
 var first_update = false;
 
 var PrivacySettingPage = React.createClass({	
