@@ -112,14 +112,14 @@ var PrivacySettingPage = React.createClass({
         <PageBlock title="哪些人可以评论我的微博" description='关闭后，你的通讯录好友将不能通过通讯录找到你'>
         	<TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.all});}}>
         		<View>
-        			<SwitchItem title="所有人">
+        			<SwitchItem style={styles.switchButton} title="所有人">
         				<Text style={styles.text}>{this.state.currentCommentId===this.state.all?'√':''}</Text>
         			</SwitchItem>
         		</View>
 	        </TouchableHighlight>
 	        <TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.myfollow});}}>
     			<View>
-    				<SwitchItem title="我关注的人">
+    				<SwitchItem style={styles.switchButton} title="我关注的人">
         				<Text style={styles.text}>{this.state.currentCommentId===this.state.myfollow?'√':''}</Text>
         			</SwitchItem>
     			</View>
@@ -134,7 +134,7 @@ var PrivacySettingPage = React.createClass({
         </PageBlock>
         <PageBlock title="">
 	        <SwitchItem title="允许评论带图">
-		        <SwitchWeibo
+		        <SwitchWeibo style={styles.switchButton}
 		          onValueChange={(value) => {this.setState({picCmtSwitchIsOn: value});this.handleSwitchChange('pic_cmt_in',this.state.picCmtSwitchIsOn);}}
 		          value={this.state.picCmtSwitchIsOn} />
 	        </SwitchItem>
@@ -179,11 +179,18 @@ var PrivacySettingPage = React.createClass({
 });
 
 var styles = StyleSheet.create({
+	switchButton:{
+		position:'absolute',
+		top:-12,
+		right:6,
+	},
 	text: {
-		paddingRight:10,
-	    fontSize: 22,
-	    fontWeight: '200',
+		marginTop:5,
+		paddingRight:12,
+		fontSize:25,
+	    fontWeight: 'normal',
 	    color: '#4EB934',
+	    alignSelf:'center',
 	  },
 });
 

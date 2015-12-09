@@ -36,7 +36,7 @@ var SwitchItem = React.createClass({
 		return(
 			<View style={styles.container}>
 		        <View>
-		          <Text style={styles.titleText}>
+		          <Text style={styles.text}>
 		            {this.props.title}
 		          </Text>
 		        </View>
@@ -50,21 +50,24 @@ var SwitchItem = React.createClass({
 
 var styles = StyleSheet.create({
   container: {
+	height:46,
+	paddingLeft:10,
+	alignItems:'center',
     backgroundColor: 'white',
     flexDirection: 'row',
-    padding: 10,
     borderBottomWidth: 1,
     borderColor:'#E6E6E6',
   },
   text: {
     color: '#333333',
+    fontSize:16,
   },
   children: {
 	position: 'absolute',	
     right: 10,
-    top:5,
-    bottom:5,
     flexDirection:'row',
+    alignItems: 'center', 
+    justifyContent: 'center',
   }
 });
 
