@@ -17,10 +17,10 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.facebook.common.logging.FLog;
-import com.facebook.react.R;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.common.ReactConstants;
 import com.facebook.react.modules.debug.FpsDebugFrameCallback;
+import com.sina.weibo.R;
 
 /**
  * View that automatically monitors and displays the current app frame rate. Also logs the current

@@ -9,19 +9,13 @@
 
 package com.facebook.react.views.toolbar;
 
-import javax.annotation.Nullable;
-
 import java.util.Map;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Color;
-import android.os.SystemClock;
-import android.view.MenuItem;
-import android.view.View;
+import javax.annotation.Nullable;
 
-import com.facebook.react.R;
+import android.content.res.TypedArray;
+import android.view.MenuItem;
+
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
@@ -30,7 +24,6 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.events.EventDispatcher;
-import com.facebook.react.views.toolbar.events.ToolbarClickEvent;
 
 /**
  * Manages instances of ReactToolbar.

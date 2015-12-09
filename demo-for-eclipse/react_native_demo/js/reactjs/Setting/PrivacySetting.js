@@ -113,21 +113,21 @@ var PrivacySettingPage = React.createClass({
         	<TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.all});}}>
         		<View>
         			<SwitchItem title="所有人">
-        				<Text>{this.state.currentCommentId===this.state.all?'checked':''}</Text>
+        				<Text>{this.state.currentCommentId===this.state.all?'√':''}</Text>
         			</SwitchItem>
         		</View>
 	        </TouchableHighlight>
 	        <TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.myfollow});}}>
     			<View>
     				<SwitchItem title="我关注的人">
-        				<Text>{this.state.currentCommentId===this.state.myfollow?'checked':''}</Text>
+        				<Text>{this.state.currentCommentId===this.state.myfollow?'√':''}</Text>
         			</SwitchItem>
     			</View>
 	        </TouchableHighlight>
     		<TouchableHighlight onPress={()=>{this.setState({currentCommentId:this.state.myfans});}}>
     			<View>
     				<SwitchItem title="我的粉丝">
-        				<Text>{this.state.currentCommentId===this.state.myfans?'checked':''}</Text>
+        				<Text>{this.state.currentCommentId===this.state.myfans?'√':''}</Text>
         			</SwitchItem>
     			</View>
 	        </TouchableHighlight>
@@ -143,14 +143,14 @@ var PrivacySettingPage = React.createClass({
         	<TouchableHighlight onPress={()=>{this.setState({currentMentionId:this.state.all});}}>
         		<View>
         			<SwitchItem title="所有人">
-        				<Text>{this.state.currentMentionId===this.state.all?'checked':''}</Text>
+        				<Text>{this.state.currentMentionId===this.state.all?'√':''}</Text>
         			</SwitchItem>
         		</View>
 	        </TouchableHighlight>
 			<TouchableHighlight onPress={()=>{this.setState({currentMentionId:this.state.myfollow});}}>
 				<View>
 					<SwitchItem title="我关注的人">
-						<Text>{this.state.currentMentionId===this.state.myfollow?'checked':''}</Text>
+						<Text>{this.state.currentMentionId===this.state.myfollow?'√':''}</Text>
 					</SwitchItem>
 				</View>
 	        </TouchableHighlight>

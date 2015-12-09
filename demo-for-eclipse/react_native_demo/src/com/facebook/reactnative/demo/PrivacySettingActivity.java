@@ -36,7 +36,7 @@ public class PrivacySettingActivity extends Activity implements DefaultHardwareB
 
     mReactInstanceManager = ReactInstanceManager.builder()
         .setApplication(getApplication())
-//        .setBundleAssetName("privacySetting.android.bundle")
+        .setBundleAssetName("privacySetting.android.bundle")
         .setJSMainModuleName("demo-for-eclipse/react_native_demo/js/reactjs/Setting/privacySetting.android")
         .addPackage(new MainReactPackage())
         .addPackage(new WeiboMainReactPackage())

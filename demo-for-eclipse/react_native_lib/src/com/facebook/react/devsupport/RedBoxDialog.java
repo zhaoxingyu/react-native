@@ -9,6 +9,8 @@
 
 package com.facebook.react.devsupport;
 
+import org.json.JSONObject;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.net.Uri;
@@ -25,16 +27,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.facebook.common.logging.FLog;
-import com.facebook.react.R;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.common.ReactConstants;
 import com.facebook.react.devsupport.StackTraceHelper.StackFrame;
-
+import com.sina.weibo.R;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
-import org.json.JSONObject;
 
 /**
  * Dialog for displaying JS errors in an eye-catching form (red box).

@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.facebook.react" >
+    package="com.sina.weibo" >
 
     <uses-sdk
         android:minSdkVersion="14"
