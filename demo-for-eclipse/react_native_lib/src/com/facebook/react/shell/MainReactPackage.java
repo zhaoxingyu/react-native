@@ -18,6 +18,7 @@ import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.modules.fresco.FrescoModule;
+import com.facebook.react.modules.imageloader.ImageloaderModule;
 import com.facebook.react.modules.intent.IntentModule;
 import com.facebook.react.modules.location.LocationModule;
 import com.facebook.react.modules.network.NetworkingModule;
@@ -55,7 +56,8 @@ public class MainReactPackage implements ReactPackage {
       new LocationModule(reactContext),
       new NetworkingModule(reactContext),
       new WebSocketModule(reactContext),
-      new ToastModule(reactContext));
+      new ToastModule(reactContext),
+      new ImageloaderModule(reactContext));
   }
 
   @Override
