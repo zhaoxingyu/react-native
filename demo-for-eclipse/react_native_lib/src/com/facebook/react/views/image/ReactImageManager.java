@@ -33,6 +33,7 @@ public class ReactImageManager extends SimpleViewManager<ReactImageView> {
   // In JS this is Image.props.source.uri
   @ReactProp(name = "src")
   public void setSource(ReactImageView view, @Nullable String source) {
+      view.setSource(source);
   }
 
   @ReactProp(name = "borderColor", customType = "Color")
