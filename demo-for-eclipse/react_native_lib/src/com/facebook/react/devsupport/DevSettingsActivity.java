@@ -9,10 +9,10 @@
 
 package com.facebook.react.devsupport;
 
+import com.facebook.react.util.ResouceUtils;
+
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
-
-import com.sina.weibo.R;
 
 /**
  * Activity that display developers settings. Should be added to the debug manifest of the app. Can
@@ -23,7 +23,9 @@ public class DevSettingsActivity extends PreferenceActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setTitle(R.string.catalyst_settings_title);
-    addPreferencesFromResource(R.xml.preferences);
+    int stringId = ResouceUtils.getResId(this, "string", "catalyst_settings_title");
+    setTitle(stringId);
+    int xmlId = ResouceUtils.getResId(this, "xml", "preferences");
+    addPreferencesFromResource(xmlId);
   }
 }

@@ -44,7 +44,7 @@ import com.facebook.react.common.ReactConstants;
 import com.facebook.react.common.ShakeDetector;
 import com.facebook.react.devsupport.StackTraceHelper.StackFrame;
 import com.facebook.react.modules.debug.DeveloperSettings;
-import com.sina.weibo.R;
+import com.facebook.react.util.ResouceUtils;
 
 /**
  * Interface for accessing and interacting with development features. Following features
@@ -237,7 +237,7 @@ public class DevSupportManager implements NativeModuleCallExceptionHandler {
     LinkedHashMap<String, DevOptionHandler> options = new LinkedHashMap<>();
     /* register standard options */
     options.put(
-        mApplicationContext.getString(R.string.catalyst_reloadjs), new DevOptionHandler() {
+        mApplicationContext.getString(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_reloadjs")), new DevOptionHandler() {
           @Override
           public void onOptionSelected() {
             handleReloadJS();
@@ -245,8 +245,8 @@ public class DevSupportManager implements NativeModuleCallExceptionHandler {
         });
     options.put(
         mIsUsingJSProxy ?
-            mApplicationContext.getString(R.string.catalyst_debugjs_off) :
-            mApplicationContext.getString(R.string.catalyst_debugjs),
+            mApplicationContext.getString(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_debugjs_off")) :
+            mApplicationContext.getString(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_debugjs")),
         new DevOptionHandler() {
           @Override
           public void onOptionSelected() {
@@ -256,8 +256,8 @@ public class DevSupportManager implements NativeModuleCallExceptionHandler {
         });
     options.put(
         mDevSettings.isReloadOnJSChangeEnabled()
-            ? mApplicationContext.getString(R.string.catalyst_live_reload_off)
-            : mApplicationContext.getString(R.string.catalyst_live_reload),
+            ? mApplicationContext.getString(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_live_reload_off"))
+            : mApplicationContext.getString(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_live_reload")),
         new DevOptionHandler() {
           @Override
           public void onOptionSelected() {
@@ -265,7 +265,7 @@ public class DevSupportManager implements NativeModuleCallExceptionHandler {
           }
         });
     options.put(
-        mApplicationContext.getString(R.string.catalyst_inspect_element),
+        mApplicationContext.getString(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_inspect_element")),
         new DevOptionHandler() {
           @Override
           public void onOptionSelected() {
@@ -274,8 +274,8 @@ public class DevSupportManager implements NativeModuleCallExceptionHandler {
         });
     options.put(
         mDevSettings.isFpsDebugEnabled()
-            ? mApplicationContext.getString(R.string.catalyst_perf_monitor_off)
-            : mApplicationContext.getString(R.string.catalyst_perf_monitor),
+            ? mApplicationContext.getString(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_perf_monitor_off"))
+            : mApplicationContext.getString(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_perf_monitor")),
         new DevOptionHandler() {
           @Override
           public void onOptionSelected() {
@@ -288,8 +288,8 @@ public class DevSupportManager implements NativeModuleCallExceptionHandler {
         mCurrentContext.getCatalystInstance().supportsProfiling()) {
       options.put(
           mApplicationContext.getString(
-              mIsCurrentlyProfiling ? R.string.catalyst_stop_profile :
-                  R.string.catalyst_start_profile),
+              mIsCurrentlyProfiling ? ResouceUtils.getResId(mApplicationContext, "string", "catalyst_stop_profile") :
+                  ResouceUtils.getResId(mApplicationContext, "string", "catalyst_start_profile")),
           new DevOptionHandler() {
             @Override
             public void onOptionSelected() {
@@ -319,7 +319,7 @@ public class DevSupportManager implements NativeModuleCallExceptionHandler {
           });
     }
     options.put(
-        mApplicationContext.getString(R.string.catalyst_settings), new DevOptionHandler() {
+        mApplicationContext.getString(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_settings")), new DevOptionHandler() {
           @Override
           public void onOptionSelected() {
             Intent intent = new Intent(mApplicationContext, DevSettingsActivity.class);
@@ -503,9 +503,9 @@ public class DevSupportManager implements NativeModuleCallExceptionHandler {
     }
 
     ProgressDialog progressDialog = new ProgressDialog(mApplicationContext);
-    progressDialog.setTitle(R.string.catalyst_jsload_title);
+    progressDialog.setTitle(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_jsload_title"));
     progressDialog.setMessage(mApplicationContext.getString(
-        mIsUsingJSProxy ? R.string.catalyst_remotedbg_message : R.string.catalyst_jsload_message));
+        mIsUsingJSProxy ? ResouceUtils.getResId(mApplicationContext, "string", "catalyst_remotedbg_message") : ResouceUtils.getResId(mApplicationContext, "string", "catalyst_jsload_message")));
     progressDialog.setIndeterminate(true);
     progressDialog.setCancelable(false);
     progressDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
@@ -553,7 +553,7 @@ public class DevSupportManager implements NativeModuleCallExceptionHandler {
                   @Override
                   public void run() {
                     showNewError(
-                        mApplicationContext.getString(R.string.catalyst_remotedbg_error),
+                        mApplicationContext.getString(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_remotedbg_error")),
                         StackTraceHelper.convertJavaStackTrace(cause),
                         JAVA_ERROR_COOKIE);
                   }
@@ -593,7 +593,7 @@ public class DevSupportManager implements NativeModuleCallExceptionHandler {
                           JAVA_ERROR_COOKIE);
                     } else {
                       showNewError(
-                          mApplicationContext.getString(R.string.catalyst_jsload_error),
+                          mApplicationContext.getString(ResouceUtils.getResId(mApplicationContext, "string", "catalyst_jsload_error")),
                           StackTraceHelper.convertJavaStackTrace(cause),
                           JAVA_ERROR_COOKIE);
                     }

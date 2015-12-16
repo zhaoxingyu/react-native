@@ -20,7 +20,7 @@ import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.common.ReactConstants;
 import com.facebook.react.modules.debug.FpsDebugFrameCallback;
-import com.sina.weibo.R;
+import com.facebook.react.util.ResouceUtils;
 
 /**
  * View that automatically monitors and displays the current app frame rate. Also logs the current
@@ -39,8 +39,8 @@ public class FpsView extends FrameLayout {
 
   public FpsView(ReactContext reactContext) {
     super(reactContext);
-    inflate(reactContext, R.layout.fps_view, this);
-    mTextView = (TextView) findViewById(R.id.fps_text);
+    inflate(reactContext, ResouceUtils.getResId(reactContext, "layout", "fps_view"), this);
+    mTextView = (TextView) findViewById(ResouceUtils.getResId(reactContext, "id", "fps_text"));
     mFrameCallback = new FpsDebugFrameCallback(Choreographer.getInstance(), reactContext);
     mFPSMonitorRunnable = new FPSMonitorRunnable();
     setCurrentFPS(0, 0, 0, 0);

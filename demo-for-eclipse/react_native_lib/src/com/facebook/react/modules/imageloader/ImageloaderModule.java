@@ -24,7 +24,9 @@ public class ImageloaderModule extends ReactContextBaseJavaModule{
     public ImageloaderModule(ReactApplicationContext reactContext) {
         super(reactContext);
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(reactContext).build();
-        ImageLoader.getInstance().init(config);
+        if (!ImageLoader.getInstance().isInited()) {
+            ImageLoader.getInstance().init(config);
+        }
     }
 
     @Override

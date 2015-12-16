@@ -30,7 +30,7 @@ import com.facebook.common.logging.FLog;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.common.ReactConstants;
 import com.facebook.react.devsupport.StackTraceHelper.StackFrame;
-import com.sina.weibo.R;
+import com.facebook.react.util.ResouceUtils;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -60,8 +60,8 @@ import com.squareup.okhttp.RequestBody;
       private final TextView mFileView;
 
       private FrameViewHolder(View v) {
-        mMethodView = (TextView) v.findViewById(R.id.rn_frame_method);
-        mFileView = (TextView) v.findViewById(R.id.rn_frame_file);
+        mMethodView = (TextView) v.findViewById(ResouceUtils.getResId(v.getContext(), "id", "rn_frame_method"));
+        mFileView = (TextView) v.findViewById(ResouceUtils.getResId(v.getContext(), "id", "rn_frame_file"));
       }
     }
 
@@ -111,13 +111,13 @@ import com.squareup.okhttp.RequestBody;
         TextView title = convertView != null
             ? (TextView) convertView
             : (TextView) LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.redbox_item_title, parent, false);
+                .inflate(ResouceUtils.getResId(parent.getContext(), "layout", "redbox_item_title"), parent, false);
         title.setText(mTitle);
         return title;
       } else {
         if (convertView == null) {
           convertView = LayoutInflater.from(parent.getContext())
-              .inflate(R.layout.redbox_item_frame, parent, false);
+              .inflate(ResouceUtils.getResId(parent.getContext(), "layout", "redbox_item_frame"), parent, false);
           convertView.setTag(new FrameViewHolder(convertView));
         }
         StackFrame frame = mStack[position - 1];
@@ -172,17 +172,17 @@ import com.squareup.okhttp.RequestBody;
   }
 
   protected RedBoxDialog(Context context, DevSupportManager devSupportManager) {
-    super(context, R.style.Theme_Catalyst_RedBox);
+    super(context, ResouceUtils.getResId(context, "style", "Theme_Catalyst_RedBox"));
 
     requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-    setContentView(R.layout.redbox_view);
+    setContentView(ResouceUtils.getResId(context, "layout", "redbox_view"));
 
     mDevSupportManager = devSupportManager;
 
-    mStackView = (ListView) findViewById(R.id.rn_redbox_stack);
+    mStackView = (ListView) findViewById(ResouceUtils.getResId(context, "id", "rn_redbox_stack"));
     mStackView.setOnItemClickListener(this);
-    mReloadJs = (Button) findViewById(R.id.rn_redbox_reloadjs);
+    mReloadJs = (Button) findViewById(ResouceUtils.getResId(context, "id", "rn_redbox_reloadjs"));
     mReloadJs.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
